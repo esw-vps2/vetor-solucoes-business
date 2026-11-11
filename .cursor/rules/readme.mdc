@@ -1,0 +1,20 @@
+---
+description: README.md is human-only; agents must not read it
+alwaysApply: true
+---
+
+# README.md is for humans only
+
+`README.md` is written for humans (clone, setup, commands). Agents must **not** read, cite, or treat it as a source of truth.
+
+For infrastructure, product, and architecture, use:
+
+- `docs/architecture.md`
+- `docs/product.md`
+- `docs/design.md`
+- `docs/conventions.md`
+- `infrastructure/docker-compose.yml`
+- `infrastructure/dockerfile.*.yml`
+- `infrastructure/.env.*.example`
+
+If a human-facing setup step is needed, tell the user to open `README.md` themselves. Do not load the file into agent context.

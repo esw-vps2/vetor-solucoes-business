@@ -1,0 +1,24 @@
+---
+description: NestJS patterns for the backend
+globs: backend/**/*
+alwaysApply: false
+---
+
+# NestJS
+
+- Follow `typescript-style.mdc`, `api-contract.mdc`, and the backend placement
+  in `docs/conventions.md`.
+- Create a feature module only when an approved specification adds a domain
+  capability or route.
+- Keep controllers limited to HTTP concerns and put domain rules in services.
+- Validate request data with DTOs at the HTTP boundary.
+- Return explicit response DTOs rather than persistence entities.
+- Read configuration from environment variables and validate it before use.
+- Use TypeORM, PostgreSQL migrations, authentication, queues, health checks,
+  mail, and external integrations only when the product and API contract
+  require them.
+- When adding or changing an HTTP endpoint, update Swagger, `openapi.yaml`,
+  and `docs/api.md` in the same change.
+- Use Vitest for backend tests. Use `vi` for mocks, spies, and fake timers.
+- Keep unit tests next to behavior and HTTP integration tests in `backend/test/`.
+- Do not add source-code comments or JSDoc. Use clear names and types instead.

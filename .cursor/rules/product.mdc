@@ -1,0 +1,25 @@
+---
+description: Product and design contracts
+alwaysApply: true
+---
+
+# Product and design contracts
+
+- An approved specification under `docs/specs/` is the source of truth for
+  feature behavior, routes, content, claims, integrations, business rules,
+  and visual acceptance criteria.
+- `docs/product.md` records durable product-wide decisions.
+- `docs/design.md` records durable visual decisions when a project adopts a
+  design system or approved reference.
+- `docs/api.md` and `docs/database.md` record the consolidated HTTP and
+  persistent-data contracts.
+- Treat an empty or `TBD` business or security field as undecided. Ask the
+  human instead of inventing a requirement, persona, route, copy, metric,
+  integration, or security policy. Decide missing design and technical how
+  as a senior engineer, record it in the specification, and promote
+  recurring visual decisions into `docs/design.md`.
+- Implement PWA, authentication, responsive targets, and external services
+  only when the approved specification and relevant global contract require
+  them.
+- Update the relevant global contract when an approved feature changes a
+  durable decision.

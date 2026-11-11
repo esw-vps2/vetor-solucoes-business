@@ -1,0 +1,22 @@
+---
+description: HTTP contract source and change requirements
+globs: backend/**/*,frontend/lib/api/**/*
+alwaysApply: false
+---
+
+# HTTP contract
+
+- An approved feature specification is the source of truth for the endpoint or
+  client change being implemented.
+- `docs/api.md` is the consolidated source of truth for published endpoints,
+  payloads, responses, errors, and authentication.
+- `openapi.yaml` at the repository root and backend Swagger UI at `/api/docs`
+  must stay aligned with that contract.
+- Read both the specification and `docs/api.md` before adding or changing an
+  endpoint or API client.
+- Do not invent product routes, fields, statuses, integrations, or side
+  effects beyond the approved specification. Technical HTTP shape is decided
+  in the specification by a senior agent. Ask the human when an HTTP change
+  would add a public route or change authentication or authorization policy.
+- Update `docs/api.md`, `openapi.yaml`, and Swagger in the same change when an
+  approved feature changes the HTTP contract.

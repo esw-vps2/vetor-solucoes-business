@@ -1,0 +1,82 @@
+# Frontend Dockerfile (Next.js)
+# Multi-stage build for the frontend workspace in the monorepo.
+# Build: docker build -f infrastructure/dockerfile.frontend.yml --target runner -t app-frontend .
+# Context: monorepo root
+
+ARG NODE_VERSION=22-alpine
+
+FROM node:${NODE_VERSION} AS deps
+WORKDIR /app
+COPY package.json package-lock.json ./
+COPY frontend/package.json ./frontend/package.json
+COPY backend/package.json ./backend/package.json
+COPY worker-proxy-agent-ia/package.json ./worker-proxy-agent-ia/package.json
+RUN --mount=type=cache,target=/root/.npm \
+  npm ci --workspace frontend --include-workspace-root && \
+  test -d /app/node_modules && \
+  test -d /app/frontend/node_modules
+
+FROM node:${NODE_VERSION} AS dev
+ENV NODE_ENV=development
+ENV NEXT_TELEMETRY_DISABLED=1
+WORKDIR /app
+COPY package.json package-lock.json ./
+COPY frontend/package.json ./frontend/package.json
+COPY backend/package.json ./backend/package.json
+COPY worker-proxy-agent-ia/package.json ./worker-proxy-agent-ia/package.json
+COPY frontend ./frontend
+COPY --from=deps /app/node_modules ./node_modules
+# npm workspaces can nest packages in frontend/node_modules, such as @tailwindcss/postcss.
+COPY --from=deps /app/frontend/node_modules ./frontend/node_modules
+WORKDIR /app/frontend
+EXPOSE 3000
+CMD ["npm", "run", "dev", "--", "--hostname", "0.0.0.0", "--port", "3000"]
+
+FROM node:${NODE_VERSION} AS builder
+WORKDIR /app
+ARG NEXT_PUBLIC_API_URL=http://localhost:3001
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+ARG NEXT_PUBLIC_API_PROXY=false
+ENV NEXT_PUBLIC_API_PROXY=${NEXT_PUBLIC_API_PROXY}
+ARG API_INTERNAL_URL=
+ENV API_INTERNAL_URL=${API_INTERNAL_URL}
+ARG NEXT_PUBLIC_WHATSAPP_NUMBER=
+ENV NEXT_PUBLIC_WHATSAPP_NUMBER=${NEXT_PUBLIC_WHATSAPP_NUMBER}
+ENV NEXT_TELEMETRY_DISABLED=1
+COPY package.json package-lock.json ./
+COPY frontend/package.json ./frontend/package.json
+COPY backend/package.json ./backend/package.json
+COPY worker-proxy-agent-ia/package.json ./worker-proxy-agent-ia/package.json
+COPY frontend ./frontend
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/frontend/node_modules ./frontend/node_modules
+WORKDIR /app/frontend
+RUN npm run build && \
+  test -f .next/standalone/frontend/server.js && \
+  test -d .next/static
+
+FROM node:${NODE_VERSION} AS runner
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV HOSTNAME=0.0.0.0
+ARG PORT=3000
+ENV PORT=${PORT}
+ARG NEXT_PUBLIC_API_URL=http://localhost:3001
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+ARG NEXT_PUBLIC_API_PROXY=false
+ENV NEXT_PUBLIC_API_PROXY=${NEXT_PUBLIC_API_PROXY}
+ARG API_INTERNAL_URL=
+ENV API_INTERNAL_URL=${API_INTERNAL_URL}
+ARG NEXT_PUBLIC_WHATSAPP_NUMBER=
+ENV NEXT_PUBLIC_WHATSAPP_NUMBER=${NEXT_PUBLIC_WHATSAPP_NUMBER}
+WORKDIR /app
+
+# Monorepo with standalone output uses frontend/server.js.
+COPY --from=builder /app/frontend/public ./frontend/public
+COPY --from=builder /app/frontend/.next/standalone ./
+COPY --from=builder /app/frontend/.next/static ./frontend/.next/static
+RUN test -f /app/frontend/server.js && \
+  test -d /app/frontend/.next/static
+
+EXPOSE ${PORT}
+CMD ["node", "frontend/server.js"]

@@ -1,0 +1,62 @@
+---
+description: Prompt-intake spec-driven delivery
+alwaysApply: true
+---
+
+# Spec-Driven Development
+
+## Required gate
+
+- New or changed product behavior requires a related specification in
+  `docs/specs/` with `status: approved`.
+- Do not implement a specification with `draft`, `in_review`, or `superseded`
+  status.
+- Read `docs/sdd/lifecycle.md`, `docs/sdd/roles.md`,
+  `docs/sdd/decision-authority.md`, and `docs/sdd/agents.yml` before working
+  on a feature specification.
+- Run `npm run sdd:validate` whenever a specification changes.
+
+## Responsibilities
+
+- Keep one assigned SDD role per deliverable.
+- When starting a dedicated chat or launching a subagent for an SDD role,
+  read [`docs/sdd/agents.yml`](docs/sdd/agents.yml) and use that role's
+  `model` and `effort`. Do not invent or substitute a model unless a human
+  overrides the assignment in the current prompt.
+- The `human_approver` role is never an LLM.
+- An intake adapter may create or update drafts but cannot approve them.
+- A specification author cannot approve its own specification.
+- A delivery agent implements only the approved scope.
+- A validation agent compares acceptance criteria to tests and recorded
+  evidence, but cannot approve its own work.
+- A named human is the only approver of a specification.
+- Ask the human about missing business and security decisions. Leave those
+  items `TBD`.
+- Decide missing design and technical how as a senior engineer, record the
+  choice in the specification, and promote recurring visual decisions into
+  `docs/design.md`. See `docs/sdd/decision-authority.md`.
+
+## Contract hierarchy
+
+- An approved feature specification is the source of truth for that feature.
+- `docs/product.md`, `docs/design.md`, `docs/api.md`, and
+  `docs/database.md` are durable global contracts, not replacements for a
+  feature specification.
+- Add a delta to the feature specification first, then update an affected
+  global contract as part of the delivery.
+- If business scope or security policy is ambiguous, incomplete, or
+  conflicts with a global contract, return it to review. Do not infer
+  missing business or security decisions.
+- If only design or technical how is missing, decide it, record it, and
+  continue. Do not ask the human for visual details that follow the
+  consolidating design system.
+
+## Intake
+
+- The only request source is a human prompt in an agent conversation.
+- Record `source_kind: human_prompt` and
+  `source_reference: chat-YYYY-MM-DD-<slug>`.
+- Do not create specifications from GitHub Issues, Kanban cards, webhooks,
+  or other systems.
+- Do not add a channel-specific workflow, secret, credential, or integration
+  unless a human updates `docs/sdd/configuration.md`.

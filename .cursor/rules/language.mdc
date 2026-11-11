@@ -1,0 +1,20 @@
+---
+description: All project artifacts must be written in English
+alwaysApply: true
+---
+
+# Project language is English
+
+Every artifact in this repository must be in **English**:
+
+- Source code and identifiers (no comments in source — `no-comments.mdc`)
+- Tests and assertion messages
+- Docs (`docs/`, `AGENTS.md`, skills, ADRs)
+- Cursor rules (`.cursor/rules/`)
+- Commit messages and PR descriptions
+- Env example comments, Docker comments, and CI config
+- User-visible UI copy, unless `docs/product.md` sets a different UI language
+
+Do not add Portuguese (or any other language) to the repo. When editing a file that is still in another language, rewrite the touched file in English in the same change.
+
+Chat with the human may follow the human's language. That does not apply to files in the repository.

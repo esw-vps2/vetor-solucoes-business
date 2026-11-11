@@ -1,0 +1,41 @@
+{
+  "name": "project-base",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Full-stack monorepo template: NestJS, Next.js, and Docker-based PostgreSQL.",
+  "workspaces": [
+    "backend",
+    "frontend",
+    "worker-proxy-agent-ia"
+  ],
+  "scripts": {
+    "compose": "docker compose -f infrastructure/docker-compose.yml --env-file infrastructure/.env.backend --env-file infrastructure/.env.frontend --env-file infrastructure/.env.database",
+    "docker:up": "npm run compose -- up --build",
+    "docker:down": "npm run compose -- down",
+    "docker:reset": "npm run compose -- down -v && npm run compose -- up --build",
+    "docker:config": "npm run compose -- config --quiet",
+    "dev:backend": "npm run start:dev --workspace backend",
+    "dev:frontend": "npm run dev --workspace frontend",
+    "build": "npm run build --workspace backend && npm run build --workspace frontend && npm run build --workspace worker-proxy-agent-ia",
+    "lint": "npm run lint --workspace backend && npm run lint --workspace frontend && npm run lint --workspace worker-proxy-agent-ia",
+    "typecheck": "npm run typecheck --workspace backend && npm run typecheck --workspace frontend && npm run typecheck --workspace worker-proxy-agent-ia",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,css,yml,yaml}\" \"automation/**/*.mjs\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,css,yml,yaml}\" \"automation/**/*.mjs\"",
+    "test": "npm run test --workspace backend && npm run test --workspace frontend && npm run test --workspace worker-proxy-agent-ia && npm run test:sdd",
+    "test:frontend": "npm run test --workspace frontend",
+    "test:e2e": "npm run test:e2e --workspace backend",
+    "test:sdd": "node --test automation/sdd/test/*.test.mjs",
+    "sdd:validate": "node automation/sdd/validate-specs.mjs",
+    "audit": "npm audit --omit=dev --audit-level=high",
+    "audit:all": "npm audit --audit-level=high"
+  },
+  "devDependencies": {
+    "prettier": "^3.9.6"
+  },
+  "overrides": {
+    "multer": "2.3.0"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

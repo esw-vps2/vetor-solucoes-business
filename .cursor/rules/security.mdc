@@ -1,0 +1,51 @@
+---
+description: Security practices
+alwaysApply: true
+---
+
+# Security
+
+## Required
+
+- Never commit `.env`, `.env.backend`, `.env.frontend`, credentials, tokens,
+  or private keys.
+- Never hardcode passwords, secrets, or production configuration in source.
+- Never weaken a security control to ship faster.
+- The frontend must never access the database directly.
+- Use HTTPS in production.
+- Sanitize API output and do not expose sensitive fields.
+
+## HTTP APIs
+
+- Validate every external input at the backend boundary with DTOs and
+  `class-validator` when an endpoint accepts input.
+- Restrict CORS to the documented frontend origin before exposing the API to
+  browsers.
+- Enable Helmet and appropriate rate limiting before exposing public routes.
+- Use a Content Security Policy for frontend deployments.
+
+## Authentication
+
+Only implement authentication when an approved feature specification and the
+relevant global product contract require it. When it is required:
+
+- Use short-lived access tokens and secure refresh or session handling.
+- Hash passwords with bcrypt at a cost of at least 10.
+- Rate-limit authentication routes.
+- Authorize every protected backend operation.
+
+## Persistence
+
+When a project adopts a database:
+
+- Use parameterized queries.
+- Give database users the least privileges required.
+- Define a backup and recovery approach before production use.
+- Do not expose persistence entities directly from HTTP controllers.
+
+## Change checklist
+
+- [ ] No secrets or sensitive values in the diff
+- [ ] External input is validated when routes accept it
+- [ ] Routes are authenticated and authorized when required
+- [ ] Sensitive response fields and logs are excluded

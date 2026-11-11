@@ -1,0 +1,43 @@
+---
+description: Frontend testing patterns with Vitest
+globs: frontend/**/*
+alwaysApply: false
+---
+
+# Frontend testing
+
+## Stack
+
+- Use Vitest, which is configured in the frontend workspace.
+- Use React Testing Library for component behavior.
+- The shared test setup loads `@testing-library/jest-dom/vitest`.
+- Add `@testing-library/user-event`, MSW, or browser end-to-end tooling only
+  when the confirmed product behavior needs it.
+
+## Test behavior
+
+- Prefer semantic queries such as `getByRole`, `getByLabelText`, and
+  `getByText`.
+- Test what users can see, enter, select, submit, and receive as feedback.
+- Avoid tests coupled to implementation details, generated class names, or
+  internal component state.
+- Mock API boundaries instead of making real external requests.
+- Test loading, error, empty, and inaccessible states when the feature has
+  them.
+
+## Scope
+
+- Add or update tests in the same change as interactive behavior, data
+  transformations, or UI regressions.
+- Add browser end-to-end coverage only for critical flows confirmed by an
+  approved specification.
+- Do not add test-only production routes or public debugging data.
+
+## Commands
+
+```bash
+npm run typecheck --workspace frontend
+npm run lint --workspace frontend
+npm run test --workspace frontend
+npm run build --workspace frontend
+```

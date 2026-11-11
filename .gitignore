@@ -1,0 +1,49 @@
+# dependencies
+node_modules/
+
+# builds
+backend/dist/
+frontend/.next/
+frontend/out/
+coverage/
+
+# environment
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS/editor
+.DS_Store
+.idea/
+.vscode/*.local.json
+
+# generated caches
+.next/
+dist/
+.cache/
+*.tsbuildinfo
+
+# infrastructure
+infrastructure/repository/
+infraestrutura/repository/
+logs/
+backend/logs/
+node_modules/
+infrastructure/.env
+infrastructure/.env.database
+infrastructure/.env.backend
+infrastructure/.env.frontend
+infrastructure/.env.powerbi
+infraestrutura/.env
+*.log
+
+# Figma / scratch exports (local reference only)
+tmp/

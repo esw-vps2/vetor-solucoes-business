@@ -1,0 +1,16 @@
+---
+description: Shared TypeScript naming, type, and formatting conventions
+globs: backend/**/*.ts,backend/**/*.tsx,frontend/**/*.ts,frontend/**/*.tsx
+alwaysApply: false
+---
+
+# TypeScript style
+
+- Keep `strict: true` in every `tsconfig.json`.
+- Avoid `any`; prefer `unknown` with explicit narrowing.
+- Use interfaces for object contracts and types for unions or intersections.
+- Use named exports unless a framework requires a default export.
+- Use kebab-case file names, PascalCase classes and types, camelCase values and
+  functions, and UPPER_SNAKE_CASE constants.
+- `.prettierrc` and `.editorconfig` define formatting. Do not override them
+  manually.

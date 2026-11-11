@@ -1,0 +1,36 @@
+---
+description: Definition of done — tests, security checklist, and command evidence
+alwaysApply: true
+---
+
+# Quality gate
+
+Code that compiles is not done. A change is done only when all three hold:
+
+## 1. Tests
+
+- Add or update tests in the same change as the behavior.
+- Backend: unit tests next to the service/controller; E2E when the change crosses HTTP.
+- Frontend: component/hook tests for interactive behavior; E2E for critical user flows.
+- If there is nothing to test (docs or rules only), say so in one sentence.
+
+## 2. Security
+
+Apply the checklist for the layer you touched (`security.mdc`, plus `nestjs_security.mdc` or `nextjs_security.mdc`). Do not ship if any of these fail:
+
+- No secrets in source or in `NEXT_PUBLIC_*`
+- No new public route or weakened guard without an approved specification
+- Input validated on the backend (DTOs); frontend checks are UX only
+- No sensitive fields in API responses or logs
+
+## 3. Evidence
+
+Run the project commands that exist (`lint`, `test`, `test:e2e`, `build` for the touched workspace). Then state, for each: **passed**, **failed**, or **not run** (and why — e.g. script missing).
+
+Do not claim tests passed unless you ran them in this session and saw the output. If a command fails, fix it or report the failure; do not mark the task complete.
+
+## 4. Version control
+
+- Do not create a commit or push without an explicit user request.
+- When explicitly asked to commit, use Conventional Commits:
+  `type(scope): summary`.

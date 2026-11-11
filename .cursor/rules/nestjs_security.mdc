@@ -1,0 +1,635 @@
+---
+description: Security patterns for NestJS applications
+globs: backend/**/*.ts
+alwaysApply: false
+---
+
+# Security patterns — NestJS
+
+## Objective
+
+Ensure the NestJS API is secure by default.
+
+Principles:
+
+- Never trust client input
+- Secure by default
+- Least privilege
+- Defense in depth
+- Fail securely
+- Minimize sensitive data
+
+Every security rule must be enforced in the backend, regardless of validations present in the frontend.
+
+---
+
+# 1. Secrets
+
+Never:
+
+- Hardcode passwords.
+- Hardcode API keys.
+- Hardcode JWT secrets.
+- Hardcode tokens.
+- Hardcode private keys.
+- Commit `.env` files containing secrets.
+- Return secrets in responses.
+- Log secrets.
+
+Use environment variables or appropriate secret management.
+
+Never do:
+
+```typescript
+const JWT_SECRET = 'secret';
+```
+
+---
+
+# 2. Input validation
+
+Never trust data received from the client.
+
+Validate:
+
+- Body
+- Query
+- Params
+- Relevant headers
+- Uploads
+
+Use DTOs with `class-validator`.
+
+Prefer a global `ValidationPipe`:
+
+```typescript
+new ValidationPipe({
+  whitelist: true,
+  forbidNonWhitelisted: true,
+  transform: true,
+});
+```
+
+Do not accept unknown properties when they are not required.
+
+Frontend validation never replaces backend validation.
+
+---
+
+# 3. Authentication
+
+Protected endpoints must require authentication.
+
+Use appropriate Guards.
+
+Tokens/sessions must have:
+
+- expiration;
+- appropriate scope;
+- short-lived access token when applicable;
+- refresh token when necessary;
+- rotation/revocation when applicable.
+
+Never trust `userId`, `role`, or equivalent information sent by the client.
+
+---
+
+# 4. Authorization
+
+Authentication determines who the user is.
+
+Authorization determines what the user can do.
+
+Every protected endpoint must evaluate authorization when necessary.
+
+Validate:
+
+```text
+User
+ ↓
+Permission
+ ↓
+Resource
+ ↓
+Action
+```
+
+Never trust:
+
+```text
+role
+permissions
+isAdmin
+userId
+```
+
+coming from the request.
+
+---
+
+# 5. Resource ownership / IDOR
+
+Always validate whether the user has access to the requested resource.
+
+Do not consider sufficient:
+
+```text
+Authenticated User
+        ↓
+GET /orders/123
+        ↓
+Allowed
+```
+
+Validate:
+
+```text
+Authenticated User
+        ↓
+Authorization
+        ↓
+Resource Ownership
+        ↓
+Access
+```
+
+Apply to:
+
+- users;
+- orders;
+- documents;
+- files;
+- accounts;
+- reports;
+- financial resources;
+- any resource identified by ID or UUID.
+
+---
+
+# 6. Passwords
+
+Never store passwords in plain text.
+
+Prefer:
+
+```text
+Argon2id
+```
+
+For existing systems using bcrypt:
+
+```text
+bcrypt
+cost >= 10
+```
+
+Never:
+
+- return password;
+- return password hash;
+- log password;
+- send password to the frontend;
+- store the original password.
+
+Authentication messages must avoid user enumeration.
+
+Prefer:
+
+```text
+Invalid credentials
+```
+
+instead of indicating whether the user or password is incorrect.
+
+---
+
+# 7. Session and token security
+
+When authentication uses cookies:
+
+```text
+HttpOnly
+Secure
+SameSite
+```
+
+must be configured appropriately.
+
+Avoid storing sensitive tokens in inadequate mechanisms.
+
+Never put tokens in:
+
+- URL;
+- query parameters;
+- logs;
+- error messages.
+
+---
+
+# 8. CORS
+
+Configure CORS explicitly.
+
+Do not use:
+
+```typescript
+origin: '*';
+```
+
+when authentication is cookie/credential-based.
+
+Allow only the necessary origins. Use the `CORS` variable from
+`.env.backend` as the allowed origin.
+
+Never allow the client to arbitrarily determine the allowed origin.
+
+---
+
+# 9. CSRF
+
+When authentication uses cookies, evaluate CSRF protection.
+
+Consider:
+
+- SameSite;
+- CSRF tokens;
+- Origin validation;
+- Referer validation when appropriate.
+
+`HttpOnly` does not protect against CSRF.
+
+---
+
+# 10. SQL Injection
+
+Use parameterized queries.
+
+Prefer TypeORM:
+
+```typescript
+repository.find({
+  where: {
+    email,
+  },
+});
+```
+
+or:
+
+```typescript
+.createQueryBuilder('user')
+.where('user.email = :email', { email });
+```
+
+Never:
+
+```typescript
+.where(`email = '${email}'`);
+```
+
+Do not use raw SQL with external input without proper parameterization.
+
+---
+
+# 11. NoSQL Injection
+
+When using a NoSQL database:
+
+- validate types;
+- build filters explicitly;
+- do not pass request objects directly to queries;
+- do not allow arbitrary operators sent by the client.
+
+---
+
+# 12. Mass Assignment
+
+Never pass `req.body` directly to persistence.
+
+Avoid:
+
+```typescript
+repository.save(req.body);
+```
+
+Prefer DTO + explicit mapping:
+
+```typescript
+repository.save({
+  name: dto.name,
+  email: dto.email,
+});
+```
+
+Fields such as:
+
+```text
+id
+role
+permissions
+ownerId
+createdAt
+updatedAt
+isAdmin
+```
+
+must be controlled by the backend.
+
+---
+
+# 13. Response security
+
+Never return entities directly when they contain sensitive data.
+
+Avoid:
+
+```typescript
+return user;
+```
+
+when it contains:
+
+```text
+passwordHash
+refreshToken
+internalMetadata
+securityFlags
+```
+
+Use Response DTOs.
+
+Return only the necessary fields.
+
+---
+
+# 14. Error handling
+
+Never expose internal details in production.
+
+Do not return:
+
+- stack traces;
+- SQL;
+- database credentials;
+- internal paths;
+- secrets;
+- unnecessary infrastructure details.
+
+The client should receive only necessary information.
+
+Technical details must remain in internal logs.
+
+---
+
+# 15. Logging
+
+Never log:
+
+- passwords;
+- access tokens;
+- refresh tokens;
+- API keys;
+- cookies;
+- Authorization headers;
+- secrets.
+
+Avoid:
+
+```typescript
+logger.log(request.headers);
+```
+
+without sanitization.
+
+Logs must be useful without exposing sensitive information.
+
+---
+
+# 16. Rate Limiting
+
+Evaluate rate limiting primarily for:
+
+```text
+/login
+/register
+/password-reset
+/refresh-token
+```
+
+and endpoints that are:
+
+- public;
+- computationally expensive;
+- subject to abuse;
+- subject to brute force.
+
+Rate limiting must exist in the backend or in an appropriate protection layer.
+
+---
+
+# 17. Brute Force
+
+Authentication endpoints must have protection against repeated attempts.
+
+Consider:
+
+- rate limiting;
+- backoff;
+- temporary lockout;
+- monitoring.
+
+Do not allow user enumeration.
+
+---
+
+# 18. File uploads
+
+Uploads must validate:
+
+- size;
+- MIME type;
+- extension;
+- content;
+- quantity;
+- file name.
+
+Never trust extension alone.
+
+Never execute files uploaded by the user.
+
+---
+
+# 19. SSRF
+
+When the backend accesses a URL provided by the user:
+
+- validate protocol;
+- validate host;
+- restrict destinations when possible;
+- block localhost;
+- block private IPs when applicable;
+- limit redirects;
+- apply timeout;
+- limit response size.
+
+Never create an open HTTP proxy without controls.
+
+---
+
+# 20. Webhooks
+
+Webhooks must validate authenticity.
+
+When supported:
+
+- validate signature;
+- validate timestamp;
+- prevent replay;
+- validate payload;
+- use idempotency.
+
+Never trust IP or User-Agent alone.
+
+---
+
+# 21. Idempotency
+
+Critical operations must consider idempotency.
+
+Primarily:
+
+```text
+Payments
+Orders
+Subscriptions
+Webhooks
+External Integrations
+```
+
+The same request must not produce duplicate effects when the domain requires idempotency.
+
+---
+
+# 22. Dependencies
+
+Before adding a dependency:
+
+- verify necessity;
+- verify maintenance;
+- verify vulnerabilities;
+- verify provenance;
+- avoid abandoned packages.
+
+Run:
+
+```bash
+npm audit
+```
+
+Do not ignore critical vulnerabilities without justification.
+
+---
+
+# 23. Security tests
+
+Test relevant scenarios:
+
+- unauthenticated user;
+- user without permission;
+- access to another user's resource;
+- invalid input;
+- disallowed fields;
+- invalid token;
+- expired token;
+- expired session;
+- operation duplication.
+
+Example:
+
+```typescript
+it('should return 403 when user does not have permission', async () => {
+  // ...
+});
+```
+
+---
+
+# 24. Security review
+
+Before completing a new feature, evaluate:
+
+```text
+Authentication?
+Authorization?
+Input validation?
+Resource ownership?
+Sensitive data?
+SQL/NoSQL injection?
+Mass assignment?
+Rate limiting?
+File upload?
+SSRF?
+Logging?
+Error exposure?
+```
+
+Apply only the controls relevant to the context.
+
+---
+
+# 25. Rules for AI Agents
+
+When implementing any feature:
+
+1. Never introduce secrets in code.
+2. Never trust client input.
+3. Validate all external inputs.
+4. Implement authorization in the backend.
+5. Validate ownership when applicable.
+6. Do not expose sensitive data.
+7. Do not log secrets.
+8. Do not remove Guards without justification.
+9. Do not make a route public without an explicit requirement.
+10. Do not disable security mechanisms to resolve errors.
+11. Do not use `eval` or `new Function`.
+12. Do not concatenate external input in SQL.
+13. Do not pass `req.body` directly to persistence.
+14. Do not ignore critical vulnerabilities without justification.
+15. Add relevant security tests.
+16. Do not remove existing tests to make the suite pass.
+17. Fix vulnerabilities introduced by the change.
+18. If you identify a vulnerability directly related to the change, fix it or report it explicitly.
+
+---
+
+# Security checklist
+
+- [ ] No secrets in code
+- [ ] Inputs validated
+- [ ] DTOs used
+- [ ] Unknown properties rejected when appropriate
+- [ ] Authentication applied when necessary
+- [ ] Authorization applied when necessary
+- [ ] Resource ownership validated
+- [ ] Parameterized SQL
+- [ ] Mass assignment avoided
+- [ ] Response DTO used when necessary
+- [ ] Sensitive data protected
+- [ ] Logs without secrets
+- [ ] Errors without internal information
+- [ ] CORS restricted
+- [ ] CSRF evaluated
+- [ ] Rate limiting evaluated
+- [ ] Uploads validated when applicable
+- [ ] SSRF evaluated when applicable
+- [ ] Webhooks authenticated when applicable
+- [ ] Dependencies evaluated
+- [ ] Relevant security tests implemented
+
+---
+
+# Fundamental Principle
+
+> Never trust the client.
+
+All security validation must be enforced in the backend, regardless of the behavior or validations present in the frontend.

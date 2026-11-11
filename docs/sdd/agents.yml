@@ -1,0 +1,31 @@
+# Preferred Cursor model and effort for each SDD role.
+# Read this file when starting a role-specific chat or subagent.
+# This file does not change role authority. See roles.md.
+
+roles:
+  intake:
+    model: openai/gpt-6-luna-pro
+    effort: high
+
+  specification:
+    model: openai/gpt-6-luna-pro
+    effort: high
+
+  architecture_security:
+    model: x-ai/grok-4.7
+    effort: extra-high
+
+  human_approver:
+    model: human
+
+  frontend_delivery:
+    model: x-ai/grok-4.7
+    effort: extra-high
+
+  backend_delivery:
+    model: x-ai/grok-4.7
+    effort: extra-high
+
+  validation:
+    model: composer-2.5
+    effort: high

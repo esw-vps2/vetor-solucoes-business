@@ -1,0 +1,9 @@
+node_modules/
+backend/dist/
+frontend/.next/
+frontend/out/
+coverage/
+.agents/
+README.md
+frontend/next-env.d.ts
+infrastructure/dockerfile.*.yml

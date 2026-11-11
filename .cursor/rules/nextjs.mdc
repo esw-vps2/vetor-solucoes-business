@@ -1,0 +1,27 @@
+---
+description: Next.js patterns for the frontend
+globs: frontend/**/*
+alwaysApply: false
+---
+
+# Next.js
+
+- Follow the approved feature specification for scope and visual acceptance
+  criteria, `docs/conventions.md` for placement, `docs/design.md` for shared
+  visual decisions, and `docs/api.md` for API contracts.
+- Use the App Router and Server Components by default.
+- Add `'use client'` only for state, effects, event handlers, browser APIs, or
+  client-only libraries.
+- Keep browser-to-backend communication in the dedicated API client location.
+- Use Tailwind CSS for styling. Add shadcn/ui, Radix, Lucide, or another UI
+  library only after the product and design require it.
+- Do not invent product routes, copy, branding, or external integrations for
+  `TBD` business requirements. Decide visual treatment as a senior engineer:
+  follow `docs/design.md`, extend the consolidating pattern, and do not ask
+  for layout or token details that fit that system.
+- Prefer semantic HTML, accessible interactions, optimized images, and
+  responsive behavior when the product requires them.
+- Treat frontend validation as user experience only; the backend remains the
+  authority for validation and authorization.
+- Use Vitest and React Testing Library for frontend tests.
+- Do not add source-code comments or JSDoc. Use clear names and types instead.

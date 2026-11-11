@@ -1,0 +1,61 @@
+---
+description: Backend testing patterns with Vitest
+globs: backend/**/*.ts
+alwaysApply: false
+---
+
+# Backend testing
+
+## Stack
+
+- Use Vitest, which is configured in the backend workspace.
+- Use `vi` for mocks, spies, and timers.
+- Use `supertest` for HTTP integration tests.
+
+## Unit tests
+
+- Place unit tests beside the behavior under test as `*.spec.ts`.
+- Test observable service and controller behavior in isolation.
+- Mock databases, network calls, clocks, queues, and other external
+  dependencies.
+- Keep tests deterministic and independent of execution order.
+
+```typescript
+import { describe, expect, it, vi } from 'vitest';
+
+describe('UsersService', () => {
+  it('returns a saved user', async () => {
+    const usersRepository = {
+      save: vi.fn().mockResolvedValue({ id: 'user-id' }),
+    };
+
+    const result = await usersRepository.save({ email: 'user@example.com' });
+
+    expect(result).toEqual({ id: 'user-id' });
+  });
+});
+```
+
+## HTTP integration tests
+
+- Place end-to-end tests in `backend/test/`.
+- Boot the Nest application and exercise routes through `supertest`.
+- Test routing, validation, guards, errors, and response contracts when those
+  capabilities exist.
+- Use isolated test configuration and do not rely on production services.
+
+## Coverage expectations
+
+- Add or update tests in the same change as behavior.
+- Prioritize business rules, authorization, validation, and error paths.
+- Do not add test-only production endpoints.
+
+## Commands
+
+```bash
+npm run typecheck --workspace backend
+npm run lint --workspace backend
+npm run test --workspace backend
+npm run test:e2e --workspace backend
+npm run build --workspace backend
+```

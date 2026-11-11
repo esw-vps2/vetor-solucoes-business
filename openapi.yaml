@@ -1,0 +1,6173 @@
+openapi: 3.0.3
+info:
+  title: VETOR API
+  description: Published HTTP contract for the VETOR backend.
+  version: '1.0'
+servers:
+  - url: http://localhost:3001
+    description: Docker Compose backend
+paths:
+  /api/v1:
+    get:
+      tags:
+        - health
+      summary: Solution health statistics
+      operationId: getHealth
+      responses:
+        '200':
+          description: Every runtime check is up
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: healthy
+                checks:
+                  api:
+                    status: up
+                  database:
+                    status: up
+                  smtp:
+                    status: up
+        '500':
+          description: At least one runtime check is down
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: unhealthy
+                checks:
+                  api:
+                    status: up
+                  database:
+                    status: down
+                  smtp:
+                    status: up
+  /api/v1/contact:
+    post:
+      tags:
+        - contact
+      summary: Send a project inquiry by email
+      operationId: createContact
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateContact'
+            example:
+              customerName: Ana Silva
+              customerEmail: ana@example.com
+              projectDescription: Need a custom operations platform.
+      responses:
+        '204':
+          description: Inquiry emailed
+        '400':
+          description: Invalid input
+        '429':
+          description: Too many requests
+        '503':
+          description: Email delivery failed
+  /api/v1/auth/login:
+    post:
+      tags:
+        - auth
+      summary: Check the password and continue with the home tenant MFA setting
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login'
+            example:
+              email: user@example.com
+              password: ExamplePassword12!
+      responses:
+        '200':
+          description: MFA challenge when the home tenant requires the emailed code, or the safe user with session cookies when that tenant has MFA disabled.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/MfaChallenge'
+                  - $ref: '#/components/schemas/LoginSession'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials, or the password matches more than one active account
+        '429':
+          description: Too many requests
+        '503':
+          description: Digit count is not configured, or email delivery failed
+  /api/v1/auth/mfa/verify:
+    post:
+      tags:
+        - auth
+      summary: Accept the emailed MFA code and start the session
+      operationId: verifyMfa
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MfaVerify'
+            example:
+              challengeId: 11111111-1111-4111-8111-111111111111
+              token: '0'
+      responses:
+        '200':
+          description: Authenticated session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeUser'
+              example:
+                id: 11111111-1111-1111-1111-111111111111
+                tenantId: 22222222-2222-2222-2222-222222222222
+                email: user@example.com
+                profile: Administrador
+                firstName: Ana
+                lastName: Silva
+                age: 40
+                sex: F
+                photoUrl: /api/v1/users/11111111-1111-4111-8111-111111111111/photo
+                tenantPhotoUrl: /api/v1/tenants/22222222-2222-2222-2222-222222222222/photo
+                tenantName: Acme
+                tenantSlug: acme
+                enabledActions:
+                  - painel
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid or expired code
+        '403':
+          description: Account blocked
+        '429':
+          description: Too many requests
+  /api/v1/auth/mfa/resend:
+    post:
+      tags:
+        - auth
+      summary: Email a new MFA code after the current one expires
+      operationId: resendMfa
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MfaResend'
+            example:
+              challengeId: 11111111-1111-4111-8111-111111111111
+      responses:
+        '200':
+          description: Replacement MFA challenge
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MfaChallenge'
+              example:
+                mfaRequired: true
+                challengeId: 11111111-1111-4111-8111-111111111112
+                expiresAt: '2026-10-01T13:00:00.000Z'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid or expired code
+        '429':
+          description: Too many requests
+        '503':
+          description: Digit count is not configured, or email delivery failed
+  /api/v1/auth/mfa/cancel:
+    post:
+      tags:
+        - auth
+      summary: Delete the emailed MFA challenge
+      operationId: cancelMfa
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MfaCancel'
+            example:
+              challengeId: 11111111-1111-4111-8111-111111111111
+      responses:
+        '204':
+          description: Challenge deleted, or no matching row
+        '400':
+          description: Invalid input
+        '429':
+          description: Too many requests
+  /api/v1/auth/refresh:
+    post:
+      tags:
+        - auth
+      summary: Rotate the refresh session
+      operationId: refresh
+      security:
+        - refresh-cookie: []
+      responses:
+        '200':
+          description: Rotated authenticated session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeUser'
+              example:
+                id: 11111111-1111-1111-1111-111111111111
+                tenantId: 22222222-2222-2222-2222-222222222222
+                email: user@example.com
+                profile: Administrador
+                firstName: Ana
+                lastName: Silva
+                age: 40
+                sex: F
+                photoUrl: /api/v1/users/11111111-1111-4111-8111-111111111111/photo
+                tenantPhotoUrl: /api/v1/tenants/22222222-2222-2222-2222-222222222222/photo
+                tenantName: Acme
+                tenantSlug: acme
+                enabledActions:
+                  - painel
+        '401':
+          description: Invalid session
+        '429':
+          description: Too many requests
+  /api/v1/auth/logout:
+    post:
+      tags:
+        - auth
+      summary: Revoke the current session
+      operationId: logout
+      security:
+        - access-cookie: []
+      responses:
+        '204':
+          description: Session revoked
+        '401':
+          description: Invalid credentials
+  /api/v1/auth/session:
+    get:
+      tags:
+        - auth
+      summary: Return the authenticated user
+      operationId: getSession
+      security:
+        - access-cookie: []
+      responses:
+        '200':
+          description: Safe authenticated user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeUser'
+              example:
+                id: 11111111-1111-1111-1111-111111111111
+                tenantId: 22222222-2222-2222-2222-222222222222
+                email: user@example.com
+                profile: Administrador
+                firstName: Ana
+                lastName: Silva
+                age: 40
+                sex: F
+                photoUrl: /api/v1/users/11111111-1111-4111-8111-111111111111/photo
+                tenantPhotoUrl: /api/v1/tenants/22222222-2222-2222-2222-222222222222/photo
+                tenantName: Acme
+                tenantSlug: acme
+                enabledActions:
+                  - painel
+        '401':
+          description: Invalid session
+    patch:
+      tags:
+        - auth
+      summary: Set the working session tenant for Administrador
+      operationId: updateSessionTenant
+      security:
+        - access-cookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSessionTenant'
+            example:
+              tenantId: 22222222-2222-2222-2222-222222222222
+      responses:
+        '200':
+          description: Updated session with the working tenant
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SafeUser'
+              example:
+                id: 11111111-1111-1111-1111-111111111111
+                tenantId: 22222222-2222-2222-2222-222222222222
+                email: user@example.com
+                profile: Administrador
+                firstName: Ana
+                lastName: Silva
+                age: 40
+                sex: F
+                photoUrl: /api/v1/users/11111111-1111-4111-8111-111111111111/photo
+                tenantPhotoUrl: /api/v1/tenants/22222222-2222-2222-2222-222222222222/photo
+                tenantName: Acme
+                tenantSlug: acme
+                enabledActions:
+                  - painel
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid session
+        '403':
+          description: Access denied
+  /api/v1/auth/password-recovery/request:
+    post:
+      tags:
+        - auth
+      summary: Request a password recovery email
+      operationId: requestPasswordRecovery
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordRecoveryRequest'
+            example:
+              email: user@example.com
+      responses:
+        '202':
+          description: Generic accepted response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasswordRecoveryAccepted'
+              example:
+                message: Se a conta existir, enviaremos instruções por e-mail.
+        '400':
+          description: Invalid input
+        '429':
+          description: Too many requests
+  /api/v1/auth/password-recovery/verify:
+    post:
+      tags:
+        - auth
+      summary: Verify a password recovery token
+      operationId: verifyPasswordRecovery
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordRecoveryVerify'
+            example:
+              email: user@example.com
+              token: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+      responses:
+        '200':
+          description: Reset challenge
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasswordRecoveryValid'
+              example:
+                valid: true
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid or expired recovery token
+        '429':
+          description: Too many requests
+  /api/v1/auth/password-recovery/reset:
+    post:
+      tags:
+        - auth
+      summary: Reset the password with a valid token
+      operationId: resetPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordRecoveryReset'
+            example:
+              email: user@example.com
+              token: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+              password: ExamplePassword12!
+              passwordConfirmation: ExamplePassword12!
+      responses:
+        '204':
+          description: Password updated
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid or expired recovery token
+        '429':
+          description: Too many requests
+  /api/v1/admin/tenant-settings:
+    get:
+      tags:
+        - admin
+      summary: List MFA settings for every tenant
+      operationId: listTenantMfaSettings
+      security:
+        - access-cookie: []
+      responses:
+        '200':
+          description: Every tenant, ordered by name
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TenantMfaSetting'
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+  /api/v1/admin/tenant-settings/{tenantId}:
+    patch:
+      tags:
+        - admin
+      summary: Set MFA for one tenant
+      operationId: updateTenantMfaSetting
+      security:
+        - access-cookie: []
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTenantMfa'
+      responses:
+        '200':
+          description: Updated tenant MFA setting
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantMfaSetting'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/admin/ai-pricing:
+    get:
+      tags:
+        - admin
+      summary: Read the shared Agente Beta token price
+      operationId: getAdminAiPricing
+      security:
+        - access-cookie: []
+      responses:
+        '200':
+          description: One price in BRL per million tokens for every tenant
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AiTokenPricing'
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+    patch:
+      tags:
+        - admin
+      summary: Set the Agente Beta token price for every tenant
+      operationId: updateAdminAiPricing
+      security:
+        - access-cookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AiTokenPricing'
+      responses:
+        '200':
+          description: Shared price written onto every tenant
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AiTokenPricing'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+  /api/v1/tenants:
+    get:
+      tags:
+        - tenants
+      summary: List tenants for user registration, Projetos, and Power BI distribution
+      operationId: listTenants
+      security:
+        - access-cookie: []
+      responses:
+        '200':
+          description: Every tenant
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TenantListItem'
+              example:
+                - id: 22222222-2222-2222-2222-222222222222
+                  name: Acme
+                  slug: acme
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+    post:
+      tags:
+        - tenants
+      summary: Register a tenant
+      operationId: createTenant
+      security:
+        - access-cookie: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateTenant'
+      responses:
+        '201':
+          description: Created tenant
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantCreated'
+              example:
+                id: 33333333-3333-4333-8333-333333333333
+                name: Northwind
+                slug: northwind
+                email: ops@example.com
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '409':
+          description: Tenant already exists
+  /api/v1/tenants/{id}/photo:
+    get:
+      tags:
+        - tenants
+      summary: Read a tenant photo
+      operationId: getTenantPhoto
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Image bytes
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                example: private, no-store
+            X-Content-Type-Options:
+              schema:
+                type: string
+                example: nosniff
+            Cross-Origin-Resource-Policy:
+              schema:
+                type: string
+                example: cross-origin
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/webp:
+              schema:
+                type: string
+                format: binary
+            image/gif:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+    put:
+      tags:
+        - tenants
+      summary: Replace a tenant photo
+      operationId: replaceTenantPhoto
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - photo
+              properties:
+                photo:
+                  type: string
+                  format: binary
+                  description: Required raster image, maximum 5 MB
+      responses:
+        '204':
+          description: Photo replaced
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+    delete:
+      tags:
+        - tenants
+      summary: Remove a tenant photo
+      operationId: deleteTenantPhoto
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Photo removed
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/powerbi/workspaces:
+    get:
+      tags:
+        - powerbi
+      summary: List Power BI workspaces from the report service
+      operationId: listPowerBiWorkspaces
+      security:
+        - access-cookie: []
+      responses:
+        '200':
+          description: Workspace list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PowerBiWorkspace'
+              example:
+                - id: 33333333-3333-4333-8333-333333333333
+                  name: Finance workspace
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '429':
+          description: Too many requests
+        '503':
+          description: Report service unavailable
+  /api/v1/powerbi/workspaces/{workspaceId}/reports:
+    get:
+      tags:
+        - powerbi
+      summary: List Power BI reports in a workspace
+      operationId: listPowerBiWorkspaceReports
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Report list from the report service
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PowerBiPythonReport'
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '429':
+          description: Too many requests
+        '503':
+          description: Report service unavailable
+  /api/v1/powerbi/workspaces/{workspaceId}/reports/{reportId}/pages:
+    get:
+      tags:
+        - powerbi
+      summary: List pages for a Power BI report
+      operationId: listPowerBiWorkspaceReportPages
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: reportId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Page list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PowerBiPage'
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '429':
+          description: Too many requests
+        '503':
+          description: Report service unavailable
+  /api/v1/powerbi/relatorios:
+    get:
+      tags:
+        - powerbi
+      summary: List imported Power BI reports
+      operationId: listPowerBiCatalog
+      security:
+        - access-cookie: []
+      responses:
+        '200':
+          description: Imported catalog
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PowerBiCatalogReport'
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+    post:
+      tags:
+        - powerbi
+      summary: Import a Power BI report into the catalog
+      operationId: importPowerBiReport
+      security:
+        - access-cookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePowerBiReport'
+            example:
+              workspaceId: 33333333-3333-4333-8333-333333333333
+              reportId: 44444444-4444-4444-8444-444444444444
+              nome: Revenue overview
+              descricao: Monthly revenue overview
+      responses:
+        '201':
+          description: Created catalog report
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PowerBiCatalogReport'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '409':
+          description: Report already registered
+        '429':
+          description: Too many requests
+        '503':
+          description: Report service unavailable
+  /api/v1/powerbi/relatorios/{id}:
+    patch:
+      tags:
+        - powerbi
+      summary: Update an imported report name and description
+      operationId: updatePowerBiReport
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePowerBiReport'
+      responses:
+        '200':
+          description: Updated catalog report
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PowerBiCatalogReport'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/powerbi/relatorios/{id}/status:
+    patch:
+      tags:
+        - powerbi
+      summary: Activate or deactivate an imported report
+      operationId: updatePowerBiReportStatus
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePowerBiStatus'
+      responses:
+        '200':
+          description: Updated catalog report
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PowerBiCatalogReport'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/powerbi/relatorios/{id}/distribuicoes:
+    get:
+      tags:
+        - powerbi
+      summary: List distributions for an imported report
+      operationId: listPowerBiDistributions
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Distributions for the report
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PowerBiDistribution'
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+    post:
+      tags:
+        - powerbi
+      summary: Distribute an imported report to a tenant
+      operationId: createPowerBiDistribution
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePowerBiDistribution'
+      responses:
+        '201':
+          description: Created distribution
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PowerBiDistribution'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+        '409':
+          description: Already distributed
+  /api/v1/powerbi/distribuicoes/{id}:
+    patch:
+      tags:
+        - powerbi
+      summary: Update a report distribution
+      operationId: updatePowerBiDistribution
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePowerBiDistribution'
+      responses:
+        '200':
+          description: Updated distribution
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PowerBiDistribution'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/powerbi/distribuicoes/{id}/status:
+    patch:
+      tags:
+        - powerbi
+      summary: Activate or deactivate a distribution
+      operationId: updatePowerBiDistributionStatus
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePowerBiStatus'
+      responses:
+        '200':
+          description: Updated distribution
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PowerBiDistribution'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/powerbi/meus-relatorios:
+    get:
+      tags:
+        - powerbi
+      summary: List active reports distributed to the session tenant
+      operationId: listMyPowerBiReports
+      security:
+        - access-cookie: []
+      responses:
+        '200':
+          description: Session-tenant report cards
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PowerBiMyReport'
+        '401':
+          description: Invalid credentials
+  /api/v1/powerbi/meus-relatorios/{distribuicaoId}/embed-token:
+    post:
+      tags:
+        - powerbi
+      summary: Issue an embed token for a distributed report
+      operationId: createPowerBiEmbedToken
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: distribuicaoId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Embed payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PowerBiEmbedToken'
+              example:
+                id: 77777777-7777-4777-8777-777777777777
+                nome: Revenue
+                embedUrl: https://app.powerbi.com/reportEmbed?reportId=44444444-4444-4444-8444-444444444444
+                embedToken: embed-token-example
+                expiration: '2026-09-20T23:00:00.000Z'
+                paginaPadrao: ReportSection
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+        '429':
+          description: Too many requests
+        '503':
+          description: Report service unavailable
+  /api/v1/users:
+    get:
+      tags:
+        - users
+      summary: List every user for the edit picker
+      operationId: listUsers
+      security:
+        - access-cookie: []
+      responses:
+        '200':
+          description: Users the actor may pick
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserListItem'
+              example:
+                - id: 11111111-1111-4111-8111-111111111111
+                  firstName: Nova
+                  lastName: User
+                  email: nova@example.com
+                  tenantId: 22222222-2222-4222-8222-222222222222
+                  tenantName: Acme
+                  tenantSlug: acme
+                  profile: Usuario
+                  enabledActions:
+                    - viewProjects
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+    post:
+      tags:
+        - users
+      summary: Register a portal user for a tenant
+      operationId: createUser
+      security:
+        - access-cookie: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateUser'
+      responses:
+        '204':
+          description: User created
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '429':
+          description: Too many requests
+  /api/v1/users/{id}:
+    get:
+      tags:
+        - users
+      summary: Load a user for edit
+      operationId: getUser
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Safe user profile plus status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditUser'
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+    patch:
+      tags:
+        - users
+      summary: Update a portal user
+      operationId: updateUser
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UpdateUser'
+      responses:
+        '204':
+          description: User updated
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+    delete:
+      tags:
+        - users
+      summary: Delete a portal user
+      operationId: deleteUser
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: User deleted
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/users/{id}/password-reset-link:
+    post:
+      tags:
+        - users
+      summary: Email a 30-minute password-change link to an active user
+      operationId: sendPasswordResetLink
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Password reset link emailed
+        '400':
+          description: User is not active
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+        '429':
+          description: Too many requests
+        '503':
+          description: Email delivery failed
+  /api/v1/users/{id}/reactivate:
+    post:
+      tags:
+        - users
+      summary: Set a blocked user back to active
+      operationId: reactivateUser
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: User reactivated
+        '400':
+          description: User is not blocked
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/users/{id}/photo:
+    get:
+      tags:
+        - users
+      summary: Read an uploaded user photo
+      operationId: getUserPhoto
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Image bytes
+          content:
+            image/avif:
+              schema:
+                type: string
+                format: binary
+            image/bmp:
+              schema:
+                type: string
+                format: binary
+            image/gif:
+              schema:
+                type: string
+                format: binary
+            image/heic:
+              schema:
+                type: string
+                format: binary
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/tiff:
+              schema:
+                type: string
+                format: binary
+            image/webp:
+              schema:
+                type: string
+                format: binary
+            image/x-icon:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/project-workspaces:
+    get:
+      tags:
+        - project-workspaces
+      summary: List project workspaces for the session tenant
+      operationId: listProjectWorkspaces
+      security:
+        - access-cookie: []
+      responses:
+        '200':
+          description: Workspaces of the session tenant
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProjectWorkspace'
+              example:
+                - id: aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa
+                  name: Delivery
+                  tenantId: 22222222-2222-4222-8222-222222222222
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+    post:
+      tags:
+        - project-workspaces
+      summary: Create a project workspace in the session tenant
+      operationId: createProjectWorkspace
+      security:
+        - access-cookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectName'
+            example:
+              name: Delivery
+      responses:
+        '201':
+          description: Created workspace
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectWorkspace'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+  /api/v1/project-workspaces/{id}:
+    patch:
+      tags:
+        - project-workspaces
+      summary: Rename a project workspace
+      operationId: updateProjectWorkspace
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectName'
+            example:
+              name: Delivery
+      responses:
+        '200':
+          description: Updated workspace
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectWorkspace'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+    delete:
+      tags:
+        - project-workspaces
+      summary: Delete a project workspace and its projects
+      operationId: deleteProjectWorkspace
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Workspace deleted
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/project-workspaces/{workspaceId}/projects:
+    get:
+      tags:
+        - projects
+      summary: List projects in a workspace
+      operationId: listProjects
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Projects of the workspace
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProjectSummary'
+              example:
+                - id: bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb
+                  name: Portal Kanban
+                  workspaceId: aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+    post:
+      tags:
+        - projects
+      summary: Create a project in a workspace
+      operationId: createProject
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectName'
+            example:
+              name: Portal Kanban
+      responses:
+        '201':
+          description: Created project
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectSummary'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/projects/{id}:
+    get:
+      tags:
+        - projects
+      summary: Load a project board
+      operationId: getProject
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Project plus lanes and cards
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectBoard'
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+    patch:
+      tags:
+        - projects
+      summary: Rename a project or store its Kanban filters
+      operationId: updateProject
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectUpdate'
+            example:
+              kanbanFilters:
+                date:
+                  endDate: null
+                  mode: start
+                  startDate: '2026-09-01'
+                status:
+                  - backlog
+                taskCompletion: incomplete
+      responses:
+        '200':
+          description: Updated project
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectSummary'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+    delete:
+      tags:
+        - projects
+      summary: Delete a project and its cards
+      operationId: deleteProject
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Project deleted
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/projects/{id}/cards:
+    post:
+      tags:
+        - cards
+      summary: Create a card on a project board
+      operationId: createCard
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCard'
+            example:
+              assigneeUserId: 11111111-1111-4111-8111-111111111111
+              description: Implement the authenticated Kanban board.
+              dueAt: '2026-09-30T03:00:00.000Z'
+              startsAt: '2026-09-21T03:00:00.000Z'
+              priority: medium
+              tags:
+                - color: lime
+                  name: portal
+              title: Build the board
+      responses:
+        '201':
+          description: Created card
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/projects/{id}/background:
+    put:
+      tags:
+        - projects
+      summary: Set the board background image
+      operationId: putProjectBackground
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: JPEG, PNG, or WEBP, maximum 8 MB
+      responses:
+        '200':
+          description: Background URL
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectBackground'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+    delete:
+      tags:
+        - projects
+      summary: Remove the board background image
+      operationId: deleteProjectBackground
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Background removed
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+    get:
+      tags:
+        - projects
+      summary: Download the board background image
+      operationId: getProjectBackground
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Image bytes
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/webp:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/projects/{id}/documents:
+    post:
+      tags:
+        - projects
+      summary: Create a project folder or upload files
+      operationId: createProjectDocuments
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProjectFolder'
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                parentId:
+                  type: string
+                  format: uuid
+                  nullable: true
+                relativePaths:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '201':
+          description: Created document nodes
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ProjectDocument'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/ProjectDocument'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/projects/{id}/documents/{documentId}:
+    get:
+      tags:
+        - projects
+      summary: Download a project file
+      operationId: getProjectDocument
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: documentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: File bytes
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+    patch:
+      tags:
+        - projects
+      summary: Rename or move a project document
+      operationId: updateProjectDocument
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: documentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProjectDocument'
+      responses:
+        '200':
+          description: Updated document
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectDocument'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+    delete:
+      tags:
+        - projects
+      summary: Delete a project file or folder
+      operationId: deleteProjectDocument
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: documentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Document deleted
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/projects/{id}/documents/{documentId}/archive:
+    get:
+      tags:
+        - projects
+      summary: Download a project folder as a zip archive
+      operationId: archiveProjectDocument
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: documentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Zip bytes
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/cards/{id}:
+    patch:
+      tags:
+        - cards
+      summary: Update writable card fields
+      operationId: updateCard
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCard'
+      responses:
+        '200':
+          description: Updated card
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+    delete:
+      tags:
+        - cards
+      summary: Delete a card
+      operationId: deleteCard
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Card deleted
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/cards/{id}/move:
+    post:
+      tags:
+        - cards
+      summary: Move a card to another lane
+      operationId: moveCard
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MoveCard'
+            example:
+              lane: ready
+      responses:
+        '200':
+          description: Updated card
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/cards/{id}/place:
+    post:
+      tags:
+        - cards
+      summary: Place a card in a lane at an index
+      operationId: placeCard
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlaceCard'
+            example:
+              lane: ready
+              position: 0
+      responses:
+        '200':
+          description: Updated card
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/cards/{id}/reorder:
+    post:
+      tags:
+        - cards
+      summary: Reorder a card in its lane
+      operationId: reorderCard
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReorderCard'
+            example:
+              direction: up
+      responses:
+        '200':
+          description: Updated order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/cards/{id}/comments:
+    post:
+      tags:
+        - cards
+      summary: Add a comment to a card
+      operationId: createCardComment
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardCommentBody'
+            example:
+              body: Ready for review.
+      responses:
+        '201':
+          description: Created comment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardComment'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/cards/{id}/comments/{commentId}:
+    patch:
+      tags:
+        - cards
+      summary: Edit a card comment
+      operationId: updateCardComment
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: commentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardCommentBody'
+            example:
+              body: Ready for review.
+      responses:
+        '200':
+          description: Updated comment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardComment'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+    delete:
+      tags:
+        - cards
+      summary: Delete a card comment
+      operationId: deleteCardComment
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: commentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Comment deleted
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/cards/{id}/checklist-items:
+    post:
+      tags:
+        - cards
+      summary: Create a checklist item
+      operationId: createChecklistItem
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChecklistItemBody'
+      responses:
+        '201':
+          description: Created checklist item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardChecklistItem'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/cards/{id}/checklist-items/{itemId}:
+    patch:
+      tags:
+        - cards
+      summary: Update a checklist item
+      operationId: updateChecklistItem
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: itemId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateChecklistItem'
+      responses:
+        '200':
+          description: Updated checklist item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardChecklistItem'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+    delete:
+      tags:
+        - cards
+      summary: Delete a checklist item
+      operationId: deleteChecklistItem
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: itemId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Checklist item deleted
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/cards/{id}/attachments:
+    post:
+      tags:
+        - cards
+      summary: Attach a file to a card
+      operationId: createCardAttachment
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Allowlisted file, maximum 5 MB
+      responses:
+        '201':
+          description: Created attachment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardAttachment'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/cards/{id}/attachments/{attachmentId}:
+    get:
+      tags:
+        - cards
+      summary: Download a card attachment
+      operationId: getCardAttachment
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: attachmentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Attachment bytes
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+    delete:
+      tags:
+        - cards
+      summary: Delete a card attachment
+      operationId: deleteCardAttachment
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: attachmentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Attachment deleted
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/finance/projects:
+    get:
+      tags: [finance]
+      summary: List project finance for every tenant
+      operationId: listFinanceProjects
+      security:
+        - access-cookie: []
+      responses:
+        '200':
+          description: Finance list. paidAmountCents sums installments whose dueOn is on or before the America/Sao_Paulo date. openAmountCents is the contract total minus that sum. resultAmountCents is that sum minus cost. project_payments are excluded.
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+  /api/v1/finance/projects/{projectId}/documents:
+    get:
+      tags: [finance]
+      summary: List private finance documents for a project
+      operationId: listFinanceProjectDocuments
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: projectId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Finance project documents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FinanceProjectDocument'
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+    post:
+      tags: [finance]
+      summary: Upload a private finance document for a project
+      operationId: uploadFinanceProjectDocument
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: projectId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Finance project document created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FinanceProjectDocument'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/finance/projects/{projectId}/documents/{documentId}:
+    get:
+      tags: [finance]
+      summary: Download a private finance document
+      operationId: downloadFinanceProjectDocument
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: projectId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: documentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Finance project document bytes
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/finance/projects/{projectId}:
+    delete:
+      tags: [finance]
+      summary: Delete a project from any tenant
+      operationId: deleteFinanceProject
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: projectId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Project deleted
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/finance/tenants/{tenantId}/notes:
+    get:
+      tags: [finance]
+      summary: List encrypted notes for one tenant
+      operationId: listTenantNotes
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: tenantId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Tenant notes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TenantNote'
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+        '503':
+          description: Invalid input
+    post:
+      tags: [finance]
+      summary: Create an encrypted note for one tenant
+      operationId: createTenantNote
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: tenantId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertTenantNote'
+      responses:
+        '201':
+          description: Note created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantNote'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+        '503':
+          description: Invalid input
+  /api/v1/finance/tenants/{tenantId}/notes/{noteId}:
+    patch:
+      tags: [finance]
+      summary: Update an encrypted note for one tenant
+      operationId: updateTenantNote
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: tenantId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: noteId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertTenantNote'
+      responses:
+        '200':
+          description: Note updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantNote'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+        '503':
+          description: Invalid input
+    delete:
+      tags: [finance]
+      summary: Delete an encrypted note for one tenant
+      operationId: deleteTenantNote
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: tenantId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: noteId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Note deleted
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+        '503':
+          description: Invalid input
+  /api/v1/projects/{id}/finance:
+    get:
+      tags: [finance]
+      summary: Load one project finance record
+      operationId: getProjectFinance
+      security:
+        - access-cookie: []
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '200':
+          description: Project finance. Installments include position, amountCents, and dueOn. Paid, open, and result use the due-date sum.
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/projects/{id}/contract:
+    put:
+      tags: [finance]
+      summary: Create or update the project contract
+      operationId: upsertProjectContract
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertProjectContract'
+      responses:
+        '200':
+          description: Contract with installments position, amountCents, and dueOn
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/projects/{id}/contract/file:
+    post:
+      tags: [finance]
+      summary: Upload or replace the contract PDF
+      operationId: uploadContractFile
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '201':
+          description: Contract file saved
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+    get:
+      tags: [finance]
+      summary: Download the contract PDF
+      operationId: downloadContractFile
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: PDF bytes
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+    delete:
+      tags: [finance]
+      summary: Remove the contract PDF
+      operationId: deleteContractFile
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: PDF removed
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/projects/{id}/payments:
+    post:
+      tags: [finance]
+      summary: Record a received payment
+      operationId: createFinancePayment
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '201':
+          description: Payment created
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/projects/{id}/payments/{paymentId}:
+    patch:
+      tags: [finance]
+      summary: Update a received payment
+      operationId: updateFinancePayment
+      security:
+        - access-cookie: []
+      responses:
+        '200':
+          description: Payment updated
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+    delete:
+      tags: [finance]
+      summary: Delete a received payment
+      operationId: deleteFinancePayment
+      security:
+        - access-cookie: []
+      responses:
+        '204':
+          description: Payment deleted
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/projects/{id}/costs:
+    post:
+      tags: [finance]
+      summary: Record a project cost
+      operationId: createFinanceCost
+      security:
+        - access-cookie: []
+      responses:
+        '201':
+          description: Cost created
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/projects/{id}/costs/{costId}:
+    patch:
+      tags: [finance]
+      summary: Update a project cost
+      operationId: updateFinanceCost
+      security:
+        - access-cookie: []
+      responses:
+        '200':
+          description: Cost updated
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+    delete:
+      tags: [finance]
+      summary: Delete a project cost
+      operationId: deleteFinanceCost
+      security:
+        - access-cookie: []
+      responses:
+        '204':
+          description: Cost deleted
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/projects/{id}/cost-lines:
+    put:
+      tags: [finance]
+      summary: Replace the project cost lines
+      operationId: replaceFinanceCostLines
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Cost lines in form order
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/tickets:
+    post:
+      tags: [tickets]
+      summary: Open a tenant support ticket
+      operationId: createTicket
+      security:
+        - access-cookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTicket'
+      responses:
+        '201':
+          description: Ticket created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TicketMutation'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+    get:
+      tags: [tickets]
+      summary: List support tickets for the effective tenant
+      operationId: listTickets
+      security:
+        - access-cookie: []
+      parameters:
+        - in: query
+          name: status
+          schema:
+            $ref: '#/components/schemas/TicketStatus'
+        - in: query
+          name: category
+          schema:
+            $ref: '#/components/schemas/TicketCategory'
+        - in: query
+          name: tenantId
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Paginated ticket summaries
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TicketList'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+  /api/v1/tickets/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags: [tickets]
+      summary: Load one support ticket
+      operationId: getTicket
+      security:
+        - access-cookie: []
+      responses:
+        '200':
+          description: Ticket detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TicketDetail'
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+    patch:
+      tags: [tickets]
+      summary: Change a support ticket status
+      operationId: updateTicketStatus
+      security:
+        - access-cookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTicketStatus'
+      responses:
+        '200':
+          description: Updated ticket
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TicketMutation'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/tickets/{id}/comments:
+    post:
+      tags: [tickets]
+      summary: Add a support ticket comment
+      operationId: createTicketComment
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTicketComment'
+      responses:
+        '201':
+          description: Comment created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TicketCommentMutation'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/tickets/{id}/read:
+    post:
+      tags: [tickets]
+      summary: Mark a support ticket as viewed by the caller
+      operationId: markTicketRead
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MarkTicketRead'
+      responses:
+        '204':
+          description: Read marker stored
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/tickets/{id}/attachments:
+    post:
+      tags: [tickets]
+      summary: Attach a file to a support ticket
+      operationId: createTicketAttachment
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TicketAttachmentFile'
+      responses:
+        '201':
+          description: Created attachment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TicketAttachment'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/tickets/{id}/attachments/{attachmentId}:
+    get:
+      tags: [tickets]
+      summary: Download a support ticket attachment
+      operationId: getTicketAttachment
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: attachmentId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Attachment bytes
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/expenses:
+    get:
+      tags: [expenses]
+      summary: List operating expenses and the period summary
+      operationId: listExpenses
+      security:
+        - access-cookie: []
+      parameters:
+        - in: query
+          name: competence
+          schema:
+            type: string
+            example: '2026-10'
+        - in: query
+          name: categoryId
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: subcategoryId
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [pending, paid, cancelled]
+        - in: query
+          name: supplier
+          schema:
+            type: string
+        - in: query
+          name: type
+          schema:
+            type: string
+            enum: [fixed, variable, occasional]
+        - in: query
+          name: projectId
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: q
+          schema:
+            type: string
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - in: query
+          name: sort
+          schema:
+            type: string
+            enum: [description, category, supplier, competence, dueOn, amount, status, recurrence]
+        - in: query
+          name: direction
+          schema:
+            type: string
+            enum: [asc, desc]
+      responses:
+        '200':
+          description: Page plus summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpenseList'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+    post:
+      tags: [expenses]
+      summary: Create an operating expense or project a recurrence
+      operationId: createExpense
+      security:
+        - access-cookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseWrite'
+      responses:
+        '201':
+          description: Expense detail or series result
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ExpenseDetail'
+                  - $ref: '#/components/schemas/ExpenseSeriesCreated'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/expenses/associations:
+    get:
+      tags: [expenses]
+      summary: List tenants and projects that an expense can reference
+      operationId: listExpenseAssociations
+      security:
+        - access-cookie: []
+      responses:
+        '200':
+          description: Association choices
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpenseAssociations'
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+  /api/v1/expenses/cancel:
+    post:
+      tags: [expenses]
+      summary: Cancel the selected operating expenses
+      operationId: cancelExpenses
+      security:
+        - access-cookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ids]
+              properties:
+                ids:
+                  type: array
+                  minItems: 1
+                  maxItems: 100
+                  items:
+                    type: string
+                    format: uuid
+      responses:
+        '200':
+          description: Cancel result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpenseCancelResult'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/expenses/{id}:
+    get:
+      tags: [expenses]
+      summary: Read one operating expense
+      operationId: getExpense
+      security:
+        - access-cookie: []
+      parameters:
+        - $ref: '#/components/parameters/ExpenseId'
+      responses:
+        '200':
+          description: Expense detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpenseDetail'
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+    patch:
+      tags: [expenses]
+      summary: Edit one operating expense or the series it still follows
+      operationId: updateExpense
+      security:
+        - access-cookie: []
+      parameters:
+        - $ref: '#/components/parameters/ExpenseId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseWrite'
+      responses:
+        '200':
+          description: Updated expense
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpenseDetail'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/expenses/{id}/cancel:
+    post:
+      tags: [expenses]
+      summary: Cancel one operating expense
+      operationId: cancelExpense
+      security:
+        - access-cookie: []
+      parameters:
+        - $ref: '#/components/parameters/ExpenseId'
+      responses:
+        '200':
+          description: Cancelled expense
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpenseDetail'
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/expenses/{id}/documents:
+    post:
+      tags: [expenses]
+      summary: Attach a finance document to an operating expense
+      operationId: addExpenseDocument
+      security:
+        - access-cookie: []
+      parameters:
+        - $ref: '#/components/parameters/ExpenseId'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Document metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpenseDocument'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/expenses/{id}/documents/{documentId}:
+    get:
+      tags: [expenses]
+      summary: Download an operating expense document
+      operationId: getExpenseDocument
+      security:
+        - access-cookie: []
+      parameters:
+        - $ref: '#/components/parameters/ExpenseId'
+        - $ref: '#/components/parameters/ExpenseDocumentId'
+      responses:
+        '200':
+          description: Document bytes
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+    delete:
+      tags: [expenses]
+      summary: Remove an operating expense document
+      operationId: deleteExpenseDocument
+      security:
+        - access-cookie: []
+      parameters:
+        - $ref: '#/components/parameters/ExpenseId'
+        - $ref: '#/components/parameters/ExpenseDocumentId'
+      responses:
+        '204':
+          description: No content
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/expense-categories:
+    get:
+      tags: [expenses]
+      summary: List operating expense categories
+      operationId: listExpenseCategories
+      security:
+        - access-cookie: []
+      responses:
+        '200':
+          description: Category tree
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ExpenseCategory'
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+    post:
+      tags: [expenses]
+      summary: Create an operating expense category
+      operationId: createExpenseCategory
+      security:
+        - access-cookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseCategoryName'
+      responses:
+        '201':
+          description: Created category
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpenseCategory'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+  /api/v1/expense-categories/{id}:
+    patch:
+      tags: [expenses]
+      summary: Rename or activate an operating expense category
+      operationId: updateExpenseCategory
+      security:
+        - access-cookie: []
+      parameters:
+        - $ref: '#/components/parameters/ExpenseCategoryId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseCategoryPatch'
+      responses:
+        '200':
+          description: Updated category
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpenseCategory'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+    delete:
+      tags: [expenses]
+      summary: Delete an unused operating expense category
+      operationId: deleteExpenseCategory
+      security:
+        - access-cookie: []
+      parameters:
+        - $ref: '#/components/parameters/ExpenseCategoryId'
+      responses:
+        '204':
+          description: No content
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+  /api/v1/expense-categories/{id}/subcategories:
+    post:
+      tags: [expenses]
+      summary: Create a subcategory under an operating expense category
+      operationId: createExpenseSubcategory
+      security:
+        - access-cookie: []
+      parameters:
+        - $ref: '#/components/parameters/ExpenseCategoryId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseCategoryName'
+      responses:
+        '201':
+          description: Created subcategory
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpenseSubcategory'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/expense-subcategories/{id}:
+    patch:
+      tags: [expenses]
+      summary: Rename or activate an operating expense subcategory
+      operationId: updateExpenseSubcategory
+      security:
+        - access-cookie: []
+      parameters:
+        - $ref: '#/components/parameters/ExpenseSubcategoryId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseCategoryPatch'
+      responses:
+        '200':
+          description: Updated subcategory
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpenseSubcategory'
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+    delete:
+      tags: [expenses]
+      summary: Delete an unused operating expense subcategory
+      operationId: deleteExpenseSubcategory
+      security:
+        - access-cookie: []
+      parameters:
+        - $ref: '#/components/parameters/ExpenseSubcategoryId'
+      responses:
+        '204':
+          description: No content
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+  /api/v1/expense-series/{id}/cancel:
+    post:
+      tags: [expenses]
+      summary: Cancel every operating expense in a series
+      operationId: cancelExpenseSeries
+      security:
+        - access-cookie: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Cancelled count
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [cancelledCount]
+                properties:
+                  cancelledCount:
+                    type: integer
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/ai/pricing:
+    get:
+      tags: [ai]
+      summary: Read AI token pricing and the caller usage cost
+      operationId: getAiPricing
+      security:
+        - access-cookie: []
+      responses:
+        '200':
+          description: Shared price per million tokens and the caller usage cost
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [tokenCostPerMillion, usageCost]
+                properties:
+                  tokenCostPerMillion:
+                    type: number
+                    example: 0.6
+                  usageCost:
+                    type: number
+                    description: BRL cost of the caller succeeded prompts
+                    example: 0.012
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+  /api/v1/ai/conversations:
+    post:
+      tags: [ai]
+      summary: Create an owner-scoped AI conversation
+      operationId: createAiConversation
+      security:
+        - access-cookie: []
+      responses:
+        '201':
+          description: Created conversation
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '429':
+          description: Too many requests
+    get:
+      tags: [ai]
+      summary: List conversations owned by the caller
+      operationId: listAiConversations
+      security:
+        - access-cookie: []
+      responses:
+        '200':
+          description: Owned conversations
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+  /api/v1/ai/conversations/{conversationId}/messages:
+    get:
+      tags: [ai]
+      summary: List messages in an owned conversation
+      operationId: listAiMessages
+      security:
+        - access-cookie: []
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Messages in sequence order
+        '401':
+          description: Invalid credentials
+        '404':
+          description: Not found
+    post:
+      tags: [ai]
+      summary: Store a message and queue an AI run
+      operationId: submitAiMessage
+      security:
+        - access-cookie: []
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: Idempotency-Key
+          in: header
+          required: false
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [content]
+              properties:
+                content:
+                  type: string
+                  minLength: 1
+                  maxLength: 8000
+      responses:
+        '202':
+          description: Accepted run
+        '400':
+          description: Invalid input
+        '401':
+          description: Invalid credentials
+        '404':
+          description: Not found
+        '409':
+          description: An active run already exists
+        '429':
+          description: Too many requests
+  /api/v1/ai/conversations/{conversationId}/attachments/{attachmentId}:
+    get:
+      tags: [ai]
+      summary: Read a file bound to an owned conversation message
+      operationId: readAiAttachment
+      security:
+        - access-cookie: []
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: attachmentId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Attachment bytes. Images use inline disposition.
+        '401':
+          description: Invalid credentials
+        '403':
+          description: Access denied
+        '404':
+          description: Not found
+  /api/v1/ai/runs/{runId}:
+    get:
+      tags: [ai]
+      summary: Read an owned AI run
+      operationId: getAiRun
+      security:
+        - access-cookie: []
+      parameters:
+        - name: runId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Owned run status
+        '401':
+          description: Invalid credentials
+        '404':
+          description: Not found
+  /api/v1/ai/runs/{runId}/events:
+    get:
+      tags: [ai]
+      summary: Stream an owned AI run
+      operationId: streamAiRun
+      security:
+        - access-cookie: []
+      parameters:
+        - name: runId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Server-sent events
+          content:
+            text/event-stream:
+              schema:
+                type: string
+        '401':
+          description: Invalid credentials
+        '404':
+          description: Not found
+        '429':
+          description: Too many requests
+components:
+  securitySchemes:
+    access-cookie:
+      type: apiKey
+      in: cookie
+      name: access_token
+    refresh-cookie:
+      type: apiKey
+      in: cookie
+      name: refresh_token
+  schemas:
+    HealthCheck:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - up
+            - down
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - checks
+      properties:
+        status:
+          type: string
+          enum:
+            - healthy
+            - unhealthy
+        checks:
+          type: object
+          required:
+            - api
+            - database
+            - smtp
+          properties:
+            api:
+              $ref: '#/components/schemas/HealthCheck'
+            database:
+              $ref: '#/components/schemas/HealthCheck'
+            smtp:
+              $ref: '#/components/schemas/HealthCheck'
+    CreateContact:
+      type: object
+      required:
+        - customerName
+        - customerEmail
+        - projectDescription
+      properties:
+        customerName:
+          type: string
+          maxLength: 160
+          example: Ana Silva
+        customerEmail:
+          type: string
+          format: email
+          maxLength: 255
+          example: ana@example.com
+        projectDescription:
+          type: string
+          maxLength: 5000
+          example: Need a custom operations platform.
+    Login:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        password:
+          type: string
+          maxLength: 128
+          example: ExamplePassword12!
+    MfaChallenge:
+      type: object
+      required:
+        - mfaRequired
+        - challengeId
+        - expiresAt
+      properties:
+        mfaRequired:
+          type: boolean
+          enum:
+            - true
+        challengeId:
+          type: string
+          format: uuid
+          example: 11111111-1111-4111-8111-111111111111
+        expiresAt:
+          type: string
+          format: date-time
+          example: '2026-10-01T12:30:00.000Z'
+    LoginSession:
+      allOf:
+        - $ref: '#/components/schemas/SafeUser'
+        - type: object
+          required:
+            - mfaRequired
+          properties:
+            mfaRequired:
+              type: boolean
+              enum:
+                - false
+    AiTokenPricing:
+      type: object
+      required:
+        - aiTokenCostPerMillion
+      properties:
+        aiTokenCostPerMillion:
+          type: number
+          minimum: 0
+          maximum: 999999
+          example: 0.6
+    TenantMfaSetting:
+      type: object
+      required:
+        - id
+        - name
+        - slug
+        - mfaEnabled
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: Acme
+        slug:
+          type: string
+          example: acme
+        mfaEnabled:
+          type: boolean
+          example: false
+    UpdateTenantMfa:
+      type: object
+      required:
+        - mfaEnabled
+      properties:
+        mfaEnabled:
+          type: boolean
+          example: true
+    MfaVerify:
+      type: object
+      required:
+        - challengeId
+        - token
+      properties:
+        challengeId:
+          type: string
+          format: uuid
+          example: 11111111-1111-4111-8111-111111111111
+        token:
+          type: string
+          description: Decimal digits. Surrounding whitespace is removed before the digit check. At most 32 digits remain.
+          pattern: '^\s*[0-9]{1,32}\s*$'
+          example: '0'
+    MfaResend:
+      type: object
+      required:
+        - challengeId
+      properties:
+        challengeId:
+          type: string
+          format: uuid
+          example: 11111111-1111-4111-8111-111111111111
+    MfaCancel:
+      type: object
+      required:
+        - challengeId
+      properties:
+        challengeId:
+          type: string
+          format: uuid
+          example: 11111111-1111-4111-8111-111111111111
+    EditUser:
+      allOf:
+        - $ref: '#/components/schemas/SafeUser'
+        - type: object
+          required:
+            - status
+          properties:
+            status:
+              type: string
+              example: blocked
+    SafeUser:
+      type: object
+      required:
+        - id
+        - tenantId
+        - email
+        - profile
+        - firstName
+        - lastName
+        - age
+        - sex
+        - photoUrl
+        - tenantPhotoUrl
+        - tenantName
+        - tenantSlug
+        - enabledActions
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 11111111-1111-1111-1111-111111111111
+        tenantId:
+          type: string
+          format: uuid
+          example: 22222222-2222-2222-2222-222222222222
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        profile:
+          type: string
+          enum:
+            - Administrador
+            - AdministradorTenant
+            - Usuario
+          example: Administrador
+        firstName:
+          type: string
+          example: Ana
+        lastName:
+          type: string
+          example: Silva
+        cargo:
+          type: string
+          maxLength: 160
+          example: Product Manager
+        age:
+          type: integer
+          example: 40
+        sex:
+          type: string
+          enum:
+            - M
+            - F
+            - O
+          example: F
+        photoUrl:
+          type: string
+          example: /api/v1/users/11111111-1111-4111-8111-111111111111/photo
+        tenantPhotoUrl:
+          type: string
+          example: /api/v1/tenants/22222222-2222-2222-2222-222222222222/photo
+        tenantName:
+          type: string
+          example: Acme
+        tenantSlug:
+          type: string
+          example: acme
+        enabledActions:
+          type: array
+          items:
+            type: string
+            enum:
+              - painel
+              - viewReports
+              - createUser
+              - editUser
+              - viewProjects
+              - manageProjects
+              - moveCards
+              - createLane
+              - renameLane
+              - deleteLane
+              - createTenant
+              - vetorAgent
+          example:
+            - painel
+    TenantListItem:
+      type: object
+      required:
+        - id
+        - name
+        - slug
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 22222222-2222-2222-2222-222222222222
+        name:
+          type: string
+          example: Acme
+        slug:
+          type: string
+          example: acme
+    CreateTenant:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - slug
+      properties:
+        name:
+          type: string
+          maxLength: 160
+          example: Northwind
+        slug:
+          type: string
+          maxLength: 80
+          example: northwind
+        email:
+          type: string
+          format: email
+          maxLength: 255
+          nullable: true
+          example: ops@example.com
+        photo:
+          type: string
+          format: binary
+          description: Optional raster image, maximum 5 MB
+    TenantCreated:
+      type: object
+      required:
+        - id
+        - name
+        - slug
+        - email
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 33333333-3333-4333-8333-333333333333
+        name:
+          type: string
+          example: Northwind
+        slug:
+          type: string
+          example: northwind
+        email:
+          type: string
+          format: email
+          nullable: true
+          example: ops@example.com
+    CreateUser:
+      type: object
+      required:
+        - tenantId
+        - firstName
+        - lastName
+        - age
+        - sex
+        - email
+        - password
+      properties:
+        tenantId:
+          type: string
+          format: uuid
+          example: 22222222-2222-4222-8222-222222222222
+        firstName:
+          type: string
+          maxLength: 160
+          example: Nova
+        lastName:
+          type: string
+          maxLength: 160
+          example: User
+        cargo:
+          type: string
+          maxLength: 160
+          example: Product Manager
+        age:
+          type: integer
+          minimum: 0
+          maximum: 150
+          example: 32
+        sex:
+          type: string
+          enum:
+            - M
+            - F
+            - O
+          example: F
+        email:
+          type: string
+          format: email
+          example: nova@example.com
+        password:
+          type: string
+          minLength: 6
+          maxLength: 128
+          pattern: '^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{6,128}$'
+          description: At least 6 characters, including a letter, a number, and a special character.
+          example: ExamplePassword12!
+        enabledActions:
+          type: array
+          items:
+            type: string
+            enum:
+              - painel
+              - viewReports
+              - createUser
+              - editUser
+              - viewProjects
+              - manageProjects
+              - moveCards
+              - createLane
+              - renameLane
+              - deleteLane
+              - createTenant
+              - vetorAgent
+          example:
+            - painel
+            - createUser
+        profile:
+          type: string
+          enum:
+            - Administrador
+            - AdministradorTenant
+          example: AdministradorTenant
+          description: Only Administrador may set this. Administrador is the global profile. AdministradorTenant administers only the new user's home tenant.
+        photo:
+          type: string
+          format: binary
+          description: Optional raster image, maximum 5 MB
+    UpdateUser:
+      type: object
+      properties:
+        firstName:
+          type: string
+          maxLength: 160
+          example: Nova
+        lastName:
+          type: string
+          maxLength: 160
+          example: User
+        cargo:
+          type: string
+          maxLength: 160
+          example: Product Manager
+        age:
+          type: integer
+          minimum: 0
+          maximum: 150
+          example: 32
+        sex:
+          type: string
+          enum:
+            - M
+            - F
+            - O
+          example: F
+        email:
+          type: string
+          format: email
+          example: nova@example.com
+        enabledActions:
+          type: array
+          items:
+            type: string
+            enum:
+              - painel
+              - viewReports
+              - createUser
+              - editUser
+              - viewProjects
+              - manageProjects
+              - moveCards
+              - createLane
+              - renameLane
+              - deleteLane
+              - createTenant
+              - vetorAgent
+          example:
+            - editUser
+        profile:
+          type: string
+          enum:
+            - Usuario
+            - AdministradorTenant
+            - Administrador
+          description: Administrador is the global profile and has every system permission. AdministradorTenant has every tenant permission and can administer only the user's home tenant.
+          example: Usuario
+        tenantId:
+          type: string
+          format: uuid
+          description: Home tenant. Only profile Administrador may send this field.
+          example: 33333333-3333-4333-8333-333333333333
+        photo:
+          type: string
+          format: binary
+          description: Optional raster image, maximum 5 MB
+    UserListItem:
+      type: object
+      required:
+        - id
+        - firstName
+        - lastName
+        - email
+        - tenantId
+        - tenantName
+        - tenantSlug
+        - profile
+        - status
+        - enabledActions
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 11111111-1111-4111-8111-111111111111
+        firstName:
+          type: string
+          example: Nova
+        lastName:
+          type: string
+          example: User
+        cargo:
+          type: string
+          maxLength: 160
+          example: Product Manager
+        email:
+          type: string
+          format: email
+          example: nova@example.com
+        tenantId:
+          type: string
+          format: uuid
+          example: 22222222-2222-4222-8222-222222222222
+        tenantName:
+          type: string
+          example: Acme
+        tenantSlug:
+          type: string
+          example: acme
+        profile:
+          type: string
+          enum:
+            - Administrador
+            - AdministradorTenant
+            - Usuario
+          example: Usuario
+        status:
+          type: string
+          example: active
+        enabledActions:
+          type: array
+          items:
+            type: string
+            enum:
+              - painel
+              - viewReports
+              - createUser
+              - editUser
+              - viewProjects
+              - manageProjects
+              - moveCards
+              - createLane
+              - renameLane
+              - deleteLane
+              - createTenant
+              - vetorAgent
+          example:
+            - viewProjects
+    PasswordRecoveryRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+    PasswordRecoveryAccepted:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: Se a conta existir, enviaremos instruções por e-mail.
+    PasswordRecoveryVerify:
+      type: object
+      required:
+        - token
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        token:
+          type: string
+          pattern: '^[a-f0-9]{64}$'
+          example: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    PasswordRecoveryValid:
+      type: object
+      required:
+        - valid
+      properties:
+        valid:
+          type: boolean
+          enum:
+            - true
+          example: true
+    PasswordRecoveryReset:
+      type: object
+      required:
+        - token
+        - password
+        - passwordConfirmation
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        token:
+          type: string
+          pattern: '^[a-f0-9]{64}$'
+          example: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+        password:
+          type: string
+          minLength: 6
+          maxLength: 128
+          pattern: '^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{6,128}$'
+          description: At least 6 characters, including a letter, a number, and a special character.
+          example: ExamplePassword12!
+        passwordConfirmation:
+          type: string
+          minLength: 6
+          maxLength: 128
+          pattern: '^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{6,128}$'
+          description: At least 6 characters, including a letter, a number, and a special character.
+          example: ExamplePassword12!
+    PowerBiWorkspace:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 33333333-3333-4333-8333-333333333333
+        name:
+          type: string
+          example: Finance workspace
+        isOnDedicatedCapacity:
+          type: boolean
+        isReadOnly:
+          type: boolean
+    PowerBiPythonReport:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 44444444-4444-4444-8444-444444444444
+        name:
+          type: string
+          example: Revenue overview
+        datasetId:
+          type: string
+          format: uuid
+          example: 55555555-5555-4555-8555-555555555555
+        embedUrl:
+          type: string
+          example: https://app.powerbi.com/reportEmbed?reportId=44444444-4444-4444-8444-444444444444
+    PowerBiPage:
+      type: object
+      required:
+        - name
+        - displayName
+      properties:
+        name:
+          type: string
+          example: ReportSection
+        displayName:
+          type: string
+          example: Summary
+        order:
+          type: integer
+          example: 0
+    PowerBiCatalogReport:
+      type: object
+      required:
+        - id
+        - workspaceId
+        - reportId
+        - datasetId
+        - embedUrl
+        - nome
+        - ativo
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 66666666-6666-4666-8666-666666666666
+        workspaceId:
+          type: string
+          format: uuid
+          example: 33333333-3333-4333-8333-333333333333
+        reportId:
+          type: string
+          format: uuid
+          example: 44444444-4444-4444-8444-444444444444
+        datasetId:
+          type: string
+          format: uuid
+          example: 55555555-5555-4555-8555-555555555555
+        embedUrl:
+          type: string
+          example: https://app.powerbi.com/reportEmbed?reportId=44444444-4444-4444-8444-444444444444
+        nome:
+          type: string
+          example: Revenue overview
+        descricao:
+          type: string
+          nullable: true
+          example: Monthly revenue overview
+        ativo:
+          type: boolean
+          example: true
+    CreatePowerBiReport:
+      type: object
+      required:
+        - workspaceId
+        - reportId
+        - nome
+      properties:
+        workspaceId:
+          type: string
+          format: uuid
+        reportId:
+          type: string
+          format: uuid
+        nome:
+          type: string
+          maxLength: 255
+        descricao:
+          type: string
+          maxLength: 500
+    UpdatePowerBiReport:
+      type: object
+      properties:
+        nome:
+          type: string
+          maxLength: 255
+        descricao:
+          type: string
+          maxLength: 500
+    UpdatePowerBiStatus:
+      type: object
+      required:
+        - ativo
+      properties:
+        ativo:
+          type: boolean
+    PowerBiDistribution:
+      type: object
+      required:
+        - id
+        - relatorioId
+        - tenantId
+        - tenantName
+        - tenantSlug
+        - ordem
+        - ativo
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 77777777-7777-4777-8777-777777777777
+        relatorioId:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+          example: 22222222-2222-4222-8222-222222222222
+        tenantName:
+          type: string
+          example: Acme
+        tenantSlug:
+          type: string
+          example: acme
+        nomeExibicao:
+          type: string
+          nullable: true
+          example: Revenue
+        icone:
+          type: string
+          nullable: true
+          example: chart
+        ordem:
+          type: integer
+          example: 1
+        paginaPadrao:
+          type: string
+          nullable: true
+          example: ReportSection
+        ativo:
+          type: boolean
+    CreatePowerBiDistribution:
+      type: object
+      required:
+        - tenantId
+      properties:
+        tenantId:
+          type: string
+          format: uuid
+        nomeExibicao:
+          type: string
+        icone:
+          type: string
+        ordem:
+          type: integer
+        paginaPadrao:
+          type: string
+    UpdatePowerBiDistribution:
+      type: object
+      properties:
+        nomeExibicao:
+          type: string
+        icone:
+          type: string
+        ordem:
+          type: integer
+        paginaPadrao:
+          type: string
+    PowerBiMyReport:
+      type: object
+      required:
+        - id
+        - ordem
+        - tenantId
+        - relatorio
+      properties:
+        id:
+          type: string
+          format: uuid
+        nomeExibicao:
+          type: string
+          nullable: true
+        icone:
+          type: string
+          nullable: true
+        ordem:
+          type: integer
+        paginaPadrao:
+          type: string
+          nullable: true
+        tenantId:
+          type: string
+          format: uuid
+        relatorio:
+          type: object
+          required:
+            - id
+            - nome
+          properties:
+            id:
+              type: string
+              format: uuid
+            nome:
+              type: string
+            descricao:
+              type: string
+              nullable: true
+    PowerBiEmbedToken:
+      type: object
+      required:
+        - id
+        - nome
+        - embedUrl
+        - embedToken
+        - expiration
+      properties:
+        id:
+          type: string
+          format: uuid
+        nome:
+          type: string
+          example: Revenue
+        embedUrl:
+          type: string
+        embedToken:
+          type: string
+          example: embed-token-example
+        expiration:
+          type: string
+          format: date-time
+          example: '2026-09-20T23:00:00.000Z'
+        paginaPadrao:
+          type: string
+          nullable: true
+          example: ReportSection
+    UpdateSessionTenant:
+      type: object
+      required:
+        - tenantId
+      properties:
+        tenantId:
+          type: string
+          format: uuid
+          example: 22222222-2222-4222-8222-222222222222
+    ProjectName:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+          example: Delivery
+    ProjectWorkspace:
+      type: object
+      required:
+        - id
+        - tenantId
+        - name
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa
+        tenantId:
+          type: string
+          format: uuid
+          example: 22222222-2222-4222-8222-222222222222
+        name:
+          type: string
+          example: Delivery
+    ProjectSummary:
+      type: object
+      required:
+        - id
+        - workspaceId
+        - name
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb
+        workspaceId:
+          type: string
+          format: uuid
+          example: aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa
+        name:
+          type: string
+          example: Portal Kanban
+    KanbanFilterDate:
+      type: object
+      required:
+        - mode
+        - startDate
+        - endDate
+      properties:
+        mode:
+          type: string
+          enum:
+            - start
+            - end
+            - range
+        startDate:
+          type: string
+          nullable: true
+          example: '2026-09-01'
+        endDate:
+          type: string
+          nullable: true
+          example: '2026-09-30'
+    KanbanFilters:
+      type: object
+      required:
+        - status
+        - date
+        - taskCompletion
+      properties:
+        status:
+          type: array
+          maxItems: 12
+          items:
+            type: string
+            pattern: '^[a-z0-9-]{1,20}$'
+        date:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/KanbanFilterDate'
+        taskCompletion:
+          type: string
+          enum:
+            - all
+            - complete
+            - incomplete
+    ProjectUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+          example: Portal Kanban
+        kanbanFilters:
+          $ref: '#/components/schemas/KanbanFilters'
+        kanbanLanes:
+          type: array
+          minItems: 1
+          maxItems: 12
+          items:
+            type: object
+            required:
+              - label
+            properties:
+              key:
+                type: string
+                pattern: '^[a-z0-9-]{1,20}$'
+              label:
+                type: string
+                minLength: 1
+                maxLength: 40
+                example: Backlog
+    CardComment:
+      type: object
+      required:
+        - id
+        - cardId
+        - authorUserId
+        - authorFirstName
+        - authorLastName
+        - body
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        cardId:
+          type: string
+          format: uuid
+        authorUserId:
+          type: string
+          format: uuid
+        authorFirstName:
+          type: string
+        authorLastName:
+          type: string
+        body:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CardAttachment:
+      type: object
+      required:
+        - id
+        - cardId
+        - contentType
+        - byteSize
+        - originalName
+        - url
+        - createdByUserId
+        - createdByFirstName
+        - createdByLastName
+      properties:
+        id:
+          type: string
+          format: uuid
+        cardId:
+          type: string
+          format: uuid
+        contentType:
+          type: string
+          example: application/pdf
+        byteSize:
+          type: integer
+          example: 1024
+        originalName:
+          type: string
+          example: brief.pdf
+        url:
+          type: string
+          example: /api/v1/cards/cccccccc-cccc-4ccc-8ccc-cccccccccccc/attachments/eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee
+        createdByUserId:
+          type: string
+          format: uuid
+        createdByFirstName:
+          type: string
+        createdByLastName:
+          type: string
+    CardTag:
+      type: object
+      required:
+        - name
+        - color
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 40
+        color:
+          type: string
+          enum:
+            - lime
+            - sky
+            - pink
+            - amber
+            - violet
+            - teal
+            - coral
+            - navy
+    CardChecklistItem:
+      type: object
+      required:
+        - id
+        - cardId
+        - body
+        - done
+        - position
+        - createdByUserId
+      properties:
+        id:
+          type: string
+          format: uuid
+        cardId:
+          type: string
+          format: uuid
+        body:
+          type: string
+        done:
+          type: boolean
+        position:
+          type: integer
+        createdByUserId:
+          type: string
+          format: uuid
+    ProjectDocument:
+      type: object
+      required:
+        - id
+        - projectId
+        - parentId
+        - kind
+        - originalName
+        - byteSize
+        - createdByUserId
+        - createdByFirstName
+        - createdByLastName
+        - children
+      properties:
+        id:
+          type: string
+          format: uuid
+        projectId:
+          type: string
+          format: uuid
+        parentId:
+          type: string
+          format: uuid
+          nullable: true
+        kind:
+          type: string
+          enum:
+            - file
+            - folder
+        originalName:
+          type: string
+        contentType:
+          type: string
+          nullable: true
+        byteSize:
+          type: integer
+        createdByUserId:
+          type: string
+          format: uuid
+        createdByFirstName:
+          type: string
+        createdByLastName:
+          type: string
+        url:
+          type: string
+          nullable: true
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectDocument'
+    UpsertProjectContract:
+      type: object
+      required:
+        - title
+        - totalAmountCents
+        - installmentCount
+        - installments
+        - status
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 160
+        signedOn:
+          type: string
+          format: date
+          nullable: true
+        startsOn:
+          type: string
+          format: date
+          nullable: true
+        endsOn:
+          type: string
+          format: date
+          nullable: true
+        totalAmountCents:
+          type: integer
+          minimum: 0
+          maximum: 99999999999
+        installmentCount:
+          type: integer
+          minimum: 1
+          maximum: 120
+        installments:
+          type: array
+          minItems: 1
+          maxItems: 120
+          items:
+            type: object
+            required: [amountCents]
+            properties:
+              amountCents:
+                type: integer
+                minimum: 0
+                maximum: 99999999999
+              dueOn:
+                type: string
+                format: date
+                nullable: true
+        status:
+          type: string
+          enum: [draft, active, closed, cancelled]
+    FinanceProjectDocument:
+      type: object
+      required:
+        - id
+        - projectId
+        - originalName
+        - contentType
+        - byteSize
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        projectId:
+          type: string
+          format: uuid
+        originalName:
+          type: string
+          maxLength: 255
+        contentType:
+          type: string
+          maxLength: 200
+        byteSize:
+          type: integer
+          minimum: 1
+          maximum: 26214400
+        createdAt:
+          type: string
+          format: date-time
+    Card:
+      type: object
+      required:
+        - id
+        - projectId
+        - number
+        - title
+        - description
+        - createdByUserId
+        - createdByFirstName
+        - createdByLastName
+        - createdAt
+        - assigneeUserId
+        - assigneeFirstName
+        - assigneeLastName
+        - priority
+        - lane
+        - position
+        - tags
+        - comments
+        - attachments
+        - checklistItems
+      properties:
+        id:
+          type: string
+          format: uuid
+        projectId:
+          type: string
+          format: uuid
+        number:
+          type: integer
+          example: 1
+        title:
+          type: string
+        description:
+          type: string
+        createdByUserId:
+          type: string
+          format: uuid
+        createdByFirstName:
+          type: string
+        createdByLastName:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        assigneeUserId:
+          type: string
+          format: uuid
+          nullable: true
+        assigneeFirstName:
+          type: string
+        assigneeLastName:
+          type: string
+        assigneePhotoUrl:
+          type: string
+          nullable: true
+        startsAt:
+          type: string
+          format: date-time
+          nullable: true
+        dueAt:
+          type: string
+          format: date-time
+          nullable: true
+        priority:
+          type: string
+          enum:
+            - low
+            - medium
+            - high
+        lane:
+          type: string
+          pattern: '^[a-z0-9-]{1,20}$'
+          example: backlog
+        position:
+          type: integer
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/CardTag'
+        coverAttachmentId:
+          type: string
+          format: uuid
+          nullable: true
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/CardComment'
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/CardAttachment'
+        checklistItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/CardChecklistItem'
+    BoardLane:
+      type: object
+      required:
+        - key
+        - label
+        - color
+        - cards
+      properties:
+        key:
+          type: string
+          pattern: '^[a-z0-9-]{1,20}$'
+          example: backlog
+        label:
+          type: string
+          example: Backlog
+        color:
+          type: string
+          pattern: '^#[0-9A-Fa-f]{6}$'
+          description: Unique among the lanes of the same project.
+          example: '#64748B'
+        cards:
+          type: array
+          items:
+            $ref: '#/components/schemas/Card'
+    ProjectBackground:
+      type: object
+      properties:
+        backgroundUrl:
+          type: string
+          nullable: true
+    ProjectBoard:
+      type: object
+      required:
+        - id
+        - workspaceId
+        - tenantId
+        - name
+        - kanbanFilters
+        - lanes
+        - documents
+      properties:
+        id:
+          type: string
+          format: uuid
+        workspaceId:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        kanbanFilters:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/KanbanFilters'
+        backgroundUrl:
+          type: string
+          nullable: true
+        lanes:
+          type: array
+          items:
+            $ref: '#/components/schemas/BoardLane'
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectDocument'
+    CreateCard:
+      type: object
+      required:
+        - title
+        - description
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 120
+        description:
+          type: string
+          minLength: 1
+          maxLength: 10000
+        assigneeUserId:
+          type: string
+          format: uuid
+          nullable: true
+        startsAt:
+          type: string
+          format: date-time
+          nullable: true
+        dueAt:
+          type: string
+          format: date-time
+          nullable: true
+        priority:
+          type: string
+          enum:
+            - low
+            - medium
+            - high
+        tags:
+          type: array
+          maxItems: 20
+          items:
+            $ref: '#/components/schemas/CardTag'
+    UpdateCard:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 120
+        description:
+          type: string
+          minLength: 1
+          maxLength: 10000
+        assigneeUserId:
+          type: string
+          format: uuid
+        startsAt:
+          type: string
+          format: date-time
+          nullable: true
+        dueAt:
+          type: string
+          format: date-time
+          nullable: true
+        priority:
+          type: string
+          enum:
+            - low
+            - medium
+            - high
+        tags:
+          type: array
+          maxItems: 20
+          items:
+            $ref: '#/components/schemas/CardTag'
+        coverAttachmentId:
+          type: string
+          format: uuid
+          nullable: true
+    PlaceCard:
+      type: object
+      required:
+        - lane
+        - position
+      properties:
+        lane:
+          type: string
+          pattern: '^[a-z0-9-]{1,20}$'
+          example: ready
+        position:
+          type: integer
+          minimum: 0
+    ChecklistItemBody:
+      type: object
+      required:
+        - body
+      properties:
+        body:
+          type: string
+          minLength: 1
+          maxLength: 200
+    UpdateChecklistItem:
+      type: object
+      properties:
+        body:
+          type: string
+          minLength: 1
+          maxLength: 200
+        done:
+          type: boolean
+    CreateProjectFolder:
+      type: object
+      required:
+        - kind
+        - name
+      properties:
+        kind:
+          type: string
+          enum:
+            - folder
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        parentId:
+          type: string
+          format: uuid
+          nullable: true
+    UpdateProjectDocument:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        parentId:
+          type: string
+          format: uuid
+          nullable: true
+    MoveCard:
+      type: object
+      required:
+        - lane
+      properties:
+        lane:
+          type: string
+          pattern: '^[a-z0-9-]{1,20}$'
+          example: ready
+    ReorderCard:
+      type: object
+      required:
+        - direction
+      properties:
+        direction:
+          type: string
+          enum:
+            - up
+            - down
+    CardCommentBody:
+      type: object
+      required:
+        - body
+      properties:
+        body:
+          type: string
+          minLength: 1
+          maxLength: 4000
+          example: Ready for review.
+    UpsertTenantNote:
+      type: object
+      additionalProperties: false
+      required:
+        - title
+        - body
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 120
+        body:
+          type: string
+          minLength: 1
+          maxLength: 4000
+        updatedAt:
+          type: string
+          format: date-time
+    TicketCategory:
+      type: string
+      enum:
+        - duvida
+        - suporte_tecnico
+        - erro_falha
+        - solicitacao_servico
+        - financeiro_cobranca
+        - melhoria
+        - outros
+    TicketStatus:
+      type: string
+      enum:
+        - aberto
+        - em_andamento
+        - em_analise
+        - resolvido
+        - cancelado
+    TicketPriority:
+      type: string
+      enum:
+        - low
+        - medium
+        - high
+    CreateTicket:
+      type: object
+      additionalProperties: false
+      required: [title, category, description]
+      properties:
+        title:
+          type: string
+          minLength: 3
+          maxLength: 160
+        category:
+          $ref: '#/components/schemas/TicketCategory'
+        description:
+          type: string
+          minLength: 10
+          maxLength: 5000
+        priority:
+          $ref: '#/components/schemas/TicketPriority'
+    TicketAttachmentFile:
+      type: object
+      required: [file]
+      properties:
+        file:
+          type: string
+          format: binary
+          description: Allowlisted file, maximum 5 MB, maximum 10 per ticket
+    UpdateTicketStatus:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status:
+          $ref: '#/components/schemas/TicketStatus'
+    CreateTicketComment:
+      type: object
+      additionalProperties: false
+      required: [body]
+      properties:
+        body:
+          type: string
+          minLength: 2
+          maxLength: 5000
+    MarkTicketRead:
+      type: object
+      additionalProperties: false
+    TicketPerson:
+      type: object
+      required: [id, displayName]
+      properties:
+        id:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+    TicketSummary:
+      type: object
+      required:
+        - id
+        - tenantId
+        - tenantName
+        - title
+        - category
+        - status
+        - priority
+        - createdAt
+        - updatedAt
+        - hasNewComments
+      properties:
+        id:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        tenantName:
+          type: string
+        title:
+          type: string
+        category:
+          $ref: '#/components/schemas/TicketCategory'
+        status:
+          $ref: '#/components/schemas/TicketStatus'
+        priority:
+          $ref: '#/components/schemas/TicketPriority'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        hasNewComments:
+          type: boolean
+    TicketComment:
+      type: object
+      required: [id, ticketId, authorId, author, body, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        ticketId:
+          type: string
+          format: uuid
+        authorId:
+          type: string
+          format: uuid
+        author:
+          $ref: '#/components/schemas/TicketPerson'
+        body:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    TicketDetail:
+      allOf:
+        - $ref: '#/components/schemas/TicketSummary'
+        - type: object
+          required: [description, openedById, openedBy, tenant, comments, attachments]
+          properties:
+            description:
+              type: string
+            openedById:
+              type: string
+              format: uuid
+            openedBy:
+              $ref: '#/components/schemas/TicketPerson'
+            tenant:
+              $ref: '#/components/schemas/TicketPerson'
+            comments:
+              type: array
+              items:
+                $ref: '#/components/schemas/TicketComment'
+            attachments:
+              type: array
+              items:
+                $ref: '#/components/schemas/TicketAttachment'
+    TicketAttachment:
+      type: object
+      required:
+        - id
+        - ticketId
+        - contentType
+        - byteSize
+        - originalName
+        - url
+        - createdByUserId
+        - createdByFirstName
+        - createdByLastName
+      properties:
+        id:
+          type: string
+          format: uuid
+        ticketId:
+          type: string
+          format: uuid
+        contentType:
+          type: string
+          example: image/png
+        byteSize:
+          type: integer
+          example: 1024
+        originalName:
+          type: string
+          example: captura.png
+        url:
+          type: string
+          example: /api/v1/tickets/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/attachments/bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb
+        createdByUserId:
+          type: string
+          format: uuid
+        createdByFirstName:
+          type: string
+        createdByLastName:
+          type: string
+    TicketMutation:
+      type: object
+      required: [message, ticket]
+      properties:
+        message:
+          type: string
+        ticket:
+          $ref: '#/components/schemas/TicketDetail'
+    TicketCommentMutation:
+      type: object
+      required: [message, comment]
+      properties:
+        message:
+          type: string
+        comment:
+          $ref: '#/components/schemas/TicketComment'
+    TicketList:
+      type: object
+      required: [items, page, limit, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TicketSummary'
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+    ExpenseItem:
+      type: object
+      required:
+        - id
+        - description
+        - categoryId
+        - categoryName
+        - amountCents
+        - competenceMonth
+        - expenseType
+        - status
+        - seriesDetached
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        description:
+          type: string
+        categoryId:
+          type: string
+          format: uuid
+        categoryName:
+          type: string
+        subcategoryId:
+          type: string
+          format: uuid
+          nullable: true
+        subcategoryName:
+          type: string
+          nullable: true
+        amountCents:
+          type: integer
+        competenceMonth:
+          type: string
+          example: '2026-10'
+        expenseType:
+          type: string
+          enum: [fixed, variable, occasional]
+        supplierName:
+          type: string
+          nullable: true
+        dueOn:
+          type: string
+          nullable: true
+        paidOn:
+          type: string
+          nullable: true
+        paymentMethod:
+          type: string
+          nullable: true
+        clientTenantId:
+          type: string
+          format: uuid
+          nullable: true
+        clientTenantName:
+          type: string
+          nullable: true
+        projectId:
+          type: string
+          format: uuid
+          nullable: true
+        projectName:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [pending, paid, cancelled]
+        recurrence:
+          type: string
+          enum: [monthly, yearly]
+          nullable: true
+        seriesId:
+          type: string
+          format: uuid
+          nullable: true
+        seriesIndex:
+          type: integer
+          nullable: true
+        seriesDetached:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ExpenseDetail:
+      allOf:
+        - $ref: '#/components/schemas/ExpenseItem'
+        - type: object
+          properties:
+            notes:
+              type: string
+              nullable: true
+            documents:
+              type: array
+              items:
+                $ref: '#/components/schemas/ExpenseDocument'
+    ExpenseDocument:
+      type: object
+      required: [id, originalName, contentType, byteSize, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        originalName:
+          type: string
+        contentType:
+          type: string
+        byteSize:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+    ExpenseList:
+      type: object
+      required: [items, page, limit, total, summary]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExpenseItem'
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        summary:
+          type: object
+          required: [periodTotalCents, paidTotalCents, pendingTotalCents, count]
+          properties:
+            periodTotalCents:
+              type: integer
+            paidTotalCents:
+              type: integer
+            pendingTotalCents:
+              type: integer
+            count:
+              type: integer
+    ExpenseSeriesCreated:
+      type: object
+      required: [seriesId, generatedCount, firstExpenseId]
+      properties:
+        seriesId:
+          type: string
+          format: uuid
+        generatedCount:
+          type: integer
+        firstExpenseId:
+          type: string
+          format: uuid
+    ExpenseCancelResult:
+      type: object
+      required: [cancelledIds, alreadyCancelledIds]
+      properties:
+        cancelledIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        alreadyCancelledIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+    ExpenseWrite:
+      type: object
+      properties:
+        description:
+          type: string
+        categoryId:
+          type: string
+          format: uuid
+        amountCents:
+          type: integer
+        expenseType:
+          type: string
+          enum: [fixed, variable, occasional]
+        competenceMonth:
+          type: string
+        status:
+          type: string
+          enum: [pending, paid, cancelled]
+        paidOn:
+          type: string
+          nullable: true
+        recurrence:
+          type: object
+          required: [interval, count, startsOn]
+          properties:
+            interval:
+              type: string
+              enum: [monthly, yearly]
+            count:
+              type: integer
+            startsOn:
+              type: string
+        scope:
+          type: string
+          enum: [occurrence, series]
+        count:
+          type: integer
+        startsOn:
+          type: string
+    ExpenseAssociations:
+      type: object
+      required: [tenants, projects]
+      properties:
+        tenants:
+          type: array
+          items:
+            type: object
+            required: [id, name]
+            properties:
+              id:
+                type: string
+                format: uuid
+              name:
+                type: string
+        projects:
+          type: array
+          items:
+            type: object
+            required: [id, name, tenantId, tenantName]
+            properties:
+              id:
+                type: string
+                format: uuid
+              name:
+                type: string
+              tenantId:
+                type: string
+                format: uuid
+              tenantName:
+                type: string
+    ExpenseCategoryName:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+    ExpenseCategoryPatch:
+      type: object
+      properties:
+        name:
+          type: string
+        active:
+          type: boolean
+    ExpenseSubcategory:
+      type: object
+      required: [id, slug, name, position, active, expenseCount]
+      properties:
+        id:
+          type: string
+          format: uuid
+        slug:
+          type: string
+        name:
+          type: string
+        position:
+          type: integer
+        active:
+          type: boolean
+        expenseCount:
+          type: integer
+    ExpenseCategory:
+      allOf:
+        - $ref: '#/components/schemas/ExpenseSubcategory'
+        - type: object
+          properties:
+            subcategories:
+              type: array
+              items:
+                $ref: '#/components/schemas/ExpenseSubcategory'
+  parameters:
+    ExpenseId:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ExpenseDocumentId:
+      in: path
+      name: documentId
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ExpenseCategoryId:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ExpenseSubcategoryId:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+        format: uuid

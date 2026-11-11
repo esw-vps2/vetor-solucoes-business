@@ -1,0 +1,44 @@
+---
+description: Do not add comments or JSDoc in application source code
+alwaysApply: true
+---
+
+# No comments in source code
+
+Do **not** add comments, JSDoc, or commented-out code in application source
+(`backend/`, `frontend/` — `.ts`, `.tsx`, `.js`, `.jsx`).
+
+Intent lives in names, types, and tests — not in `//`, `/* */`, or `{/* */}`.
+
+```typescript
+// ❌ BAD
+/** Returns the user by id. */
+function getUser(id: string) {
+  // fetch from the API
+  return api.get(`/users/${id}`);
+}
+
+// ✅ GOOD
+function getUserById(id: string) {
+  return api.get(`/users/${id}`);
+}
+```
+
+## Do not
+
+- Narrate what the next line does
+- Leave commented-out code
+- Add JSDoc for public APIs, components, or DTOs
+- Add JSX comments
+
+## Exceptions (only these)
+
+- Third-party or generated files — do not rewrite them to strip comments
+- Markdown, Cursor rules, skills, and `docs/` — not source code
+- Dockerfiles, Compose, and `.env.*.example` — comments allowed; English only
+  (`language.mdc`)
+- An `eslint-disable` / `ts-expect-error` directive **only** when config cannot
+  express it; no extra explanation around it
+
+When editing a file that already has comments, remove comments in the code you
+touch. Do not run a repo-wide comment strip unless asked.

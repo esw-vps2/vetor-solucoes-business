@@ -1,0 +1,166 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100..900;1,100..900&display=swap');
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+  --color-navy: #060b18;
+  --color-navy-50: #0a1020;
+  --color-navy-100: #0e1628;
+  --color-navy-200: #141e35;
+  --color-navy-300: #1a2844;
+  --color-navy-400: #243556;
+  --color-accent: #bdda2b;
+  --color-accent-hover: #a9c425;
+  --color-accent-soft: rgba(189, 218, 43, 0.08);
+  --color-board-lane-backlog: #64748b;
+  --color-board-lane-ready: #3d9cf0;
+  --color-board-lane-working: #f5a524;
+  --color-board-lane-review: #7b6cff;
+  --color-board-lane-deploy: #2ec4b6;
+  --color-board-lane-done: #bdda2b;
+  --color-board-label-lime: #bdda2b;
+  --color-board-label-sky: #3d9cf0;
+  --color-board-label-pink: #e85d8c;
+  --color-board-label-amber: #f5a524;
+  --color-board-label-violet: #7b6cff;
+  --color-board-label-teal: #2ec4b6;
+  --color-board-label-coral: #ff6b4a;
+  --color-board-label-navy: #1a2844;
+  --color-board-due-overdue: #e24b4a;
+  --color-board-due-today: #f5a524;
+  --color-board-due-future: #4a5267;
+  --color-board-priority-low: #2ec4b6;
+  --color-board-priority-medium: #f5a524;
+  --color-board-priority-high: #e24b4a;
+  --color-off-white: #f8f9fc;
+  --color-warm-gray: #f1f3f8;
+  --color-glass: rgba(255, 255, 255, 0.04);
+  --color-glass-border: rgba(255, 255, 255, 0.06);
+  --color-glass-light: rgba(0, 0, 0, 0.02);
+  --color-glass-border-light: rgba(0, 0, 0, 0.04);
+  --color-text-primary: #f0f2f7;
+  --color-text-secondary: #8892a6;
+  --color-text-muted: #505b70;
+  --color-text-dark: #0d1321;
+  --color-text-dark-secondary: #4a5267;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 6.5rem;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@keyframes whatsapp-ready {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.whatsapp-ready-motion {
+  animation: whatsapp-ready 2.4s ease-in-out infinite;
+}
+
+@keyframes vetor-agent-message-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.vetor-agent-message-in {
+  animation: vetor-agent-message-in 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .whatsapp-ready-motion,
+  .vetor-agent-message-in {
+    animation: none;
+  }
+}
+
+body {
+  background: var(--color-navy);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  overflow-x: clip;
+}
+
+::selection {
+  background: rgba(189, 218, 43, 0.2);
+  color: #fff;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-navy-300);
+  border-radius: 10px;
+}
+
+.powerbi-embed-frame {
+  display: block;
+  flex: 1 1 auto;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  overflow: auto;
+  position: relative;
+  width: 100%;
+}
+
+.powerbi-embed-frame iframe {
+  background: #fff;
+  border: 0;
+  color-scheme: light;
+  display: block;
+  max-width: 100%;
+  width: 100%;
+}
+
+.board-canvas-default {
+  background-color: var(--color-navy);
+  background-image:
+    radial-gradient(circle at 18% 20%, var(--color-navy-300), transparent 42%),
+    radial-gradient(circle at 82% 8%, var(--color-accent-soft), transparent 46%);
+}
+
+.board-lane-raised {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.75),
+    inset 0 -2px 3px rgb(6 11 24 / 0.08),
+    0 10px 0 -4px rgb(26 40 68 / 0.35),
+    0 20px 32px -10px rgb(6 11 24 / 0.45),
+    0 36px 48px -16px rgb(6 11 24 / 0.28);
+}
+
+.dark .board-lane-raised {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.12),
+    inset 0 -2px 4px rgb(0 0 0 / 0.35),
+    0 10px 0 -4px rgb(0 0 0 / 0.45),
+    0 20px 32px -10px rgb(0 0 0 / 0.5),
+    0 36px 48px -16px rgb(0 0 0 / 0.4);
+}

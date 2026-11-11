@@ -1,0 +1,38 @@
+---
+description: Install packages in the workspace that uses them, not at the repo root
+alwaysApply: true
+---
+
+# npm workspaces
+
+This repo is an npm workspaces monorepo. Install a package in the **workspace that imports it**, never in the root `package.json` unless the exception below applies.
+
+## Where packages go
+
+| Package kind | Location |
+| --- | --- |
+| NestJS, TypeORM, `class-validator`, `class-transformer`, backend test libs | `backend/package.json` |
+| Next.js, React, Tailwind, frontend test libs | `frontend/package.json` |
+| Repo-wide tooling used from root scripts (e.g. Prettier) | root `package.json` `devDependencies` |
+| npm `overrides` / `engines` / `workspaces` | root `package.json` only |
+
+## Commands
+
+From the **repository root**:
+
+```bash
+npm install <pkg> --workspace backend
+npm install <pkg> --workspace frontend
+npm install -D <pkg> --workspace backend
+```
+
+Do **not** run `npm install <pkg>` at the root (that writes root `dependencies`).
+Do **not** add Nest or Next libraries to root `dependencies` so Docker or hoisting “finds” them.
+
+## Root `package.json` may contain
+
+- `workspaces`, `scripts`, `engines`
+- Shared format/lint CLIs invoked from root scripts
+- `overrides` for transitive security pins
+
+If both apps need the same library, still install it in **each** workspace. Do not hoist it to the root to “share” it.

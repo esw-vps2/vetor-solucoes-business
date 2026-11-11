@@ -1,0 +1,24 @@
+{
+  "name": "worker-proxy-agent-ia",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/main.js",
+    "start:dev": "tsc -p tsconfig.build.json && node scripts/dev-supervisor.mjs ../backend/dist/modules/ai-agent/ai-worker.module.js -- node dist/main.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint src test scripts",
+    "test": "node --test test/main.test.mjs test/dev-supervisor.test.mjs"
+  },
+  "dependencies": {
+    "@nestjs/common": "^12.0.1",
+    "@nestjs/core": "^12.0.1",
+    "reflect-metadata": "^0.2.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "oxlint": "^1.58.0",
+    "typescript": "^6.0.2"
+  }
+}

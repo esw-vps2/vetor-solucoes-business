@@ -1,0 +1,86 @@
+# Backend Dockerfile (NestJS)
+# Multi-stage build for the backend workspace in the monorepo.
+# Build: docker build -f infrastructure/dockerfile.backend.yml --target runner -t app-backend .
+# Context: monorepo root
+
+ARG NODE_VERSION=22-alpine
+
+FROM node:${NODE_VERSION} AS development
+
+RUN mkdir /app && chown node:node /app && \
+  mkdir -p /app/files && chown node:node /app/files && \
+  apk add --no-cache g++ make python3 && \
+  rm -vrf /var/cache/apk/*
+
+WORKDIR /app
+
+ENV NODE_PATH=/app/node_modules:/app/backend/node_modules
+
+COPY --chown=node:node package.json package-lock.json ./
+COPY --chown=node:node backend/package.json ./backend/package.json
+COPY --chown=node:node frontend/package.json ./frontend/package.json
+COPY --chown=node:node worker-proxy-agent-ia/package.json ./worker-proxy-agent-ia/package.json
+
+# Running npm as the node user prevents EACCES in the development node_modules volume.
+# npm workspaces hoist backend packages to /app/node_modules, so create the
+# workspace folder before later COPY --from stages look it up.
+USER node
+RUN --mount=type=cache,target=/home/node/.npm,uid=1000,gid=1000 \
+  npm ci --workspace backend && \
+  mkdir -p /app/backend/node_modules && \
+  test -d /app/node_modules
+
+COPY --chown=node:node backend ./backend
+
+WORKDIR /app/backend
+EXPOSE 3001
+CMD ["npm", "run", "start:dev"]
+
+FROM node:${NODE_VERSION} AS builder
+
+RUN mkdir /app && chown node:node /app && \
+  apk add --no-cache g++ make python3 && \
+  rm -vrf /var/cache/apk/*
+
+WORKDIR /app
+
+COPY --chown=node:node package.json package-lock.json ./
+COPY --chown=node:node backend/package.json ./backend/package.json
+COPY --chown=node:node frontend/package.json ./frontend/package.json
+COPY --chown=node:node worker-proxy-agent-ia/package.json ./worker-proxy-agent-ia/package.json
+COPY --chown=node:node --from=development /app/node_modules ./node_modules
+COPY --chown=node:node --from=development /app/backend/node_modules ./backend/node_modules
+COPY --chown=node:node backend ./backend
+
+WORKDIR /app/backend
+USER node
+RUN npm run build && test -f dist/main.js
+
+FROM node:${NODE_VERSION} AS runner
+
+ARG APP_VERSION=0.0.0
+ENV APP_VERSION=${APP_VERSION}
+ENV NODE_ENV=production
+ENV NODE_PATH=/app/node_modules:/app/backend/node_modules
+
+WORKDIR /app
+
+RUN mkdir -p /app/logs /app/files && chown -R node:node /app
+
+COPY --chown=node:node package.json package-lock.json ./
+COPY --chown=node:node backend/package.json ./backend/package.json
+COPY --chown=node:node frontend/package.json ./frontend/package.json
+COPY --chown=node:node worker-proxy-agent-ia/package.json ./worker-proxy-agent-ia/package.json
+
+RUN --mount=type=cache,target=/root/.npm \
+  npm ci --omit=dev --workspace backend && \
+  npm cache clean --force
+
+COPY --chown=node:node --from=builder /app/backend/dist ./backend/dist
+RUN test -f /app/backend/dist/main.js && \
+  test -d /app/node_modules
+
+WORKDIR /app/backend
+USER node
+EXPOSE 3001
+CMD ["node", "dist/main.js"]

@@ -1,0 +1,65 @@
+---
+description: PostgreSQL conventions when persistence is adopted
+globs: backend/**/*,infrastructure/**/*
+alwaysApply: false
+---
+
+# PostgreSQL
+
+Apply this rule when work touches the PostgreSQL service, schema, migrations,
+or database configuration.
+
+## Schema conventions
+
+- Tables: `snake_case`, plural (`users`, `order_items`)
+- Columns: `snake_case` (`created_at`, `user_id`)
+- Indexes: `idx_<table>_<column(s)>`
+- Primary keys: `pk_<table>`
+- Unique constraints: `uq_<table>_<column(s)>`
+- Foreign keys: `fk_<table>_<reference>`
+- Check constraints: `chk_<table>_<rule>`
+
+## Standard columns
+
+Every table should include:
+
+- `id uuid PRIMARY KEY DEFAULT gen_random_uuid()`
+- `created_at timestamptz NOT NULL DEFAULT now()`
+- `updated_at timestamptz NOT NULL DEFAULT now()`
+- `deleted_at timestamptz NULL` — only when soft delete is required
+
+## Preferred types
+
+| Concept | PG type |
+|---------|---------|
+| ID | `uuid` |
+| Short text | `varchar(n)` |
+| Long text | `text` |
+| Boolean | `boolean` |
+| Date/time | `timestamptz` |
+| Money / decimals | `numeric(p, s)` — never `float` or `double precision` |
+| JSON | `jsonb` |
+
+## Foreign keys
+
+- Always define explicit `ON DELETE` and `ON UPDATE` behavior — never rely on defaults
+- Parent/owned records: `ON DELETE CASCADE` (e.g. order_items → orders)
+- Reference/lookup records: `ON DELETE RESTRICT` or `SET NULL`
+- Index every foreign key column
+
+## Best practices
+
+- Always use `timestamptz` for dates (not `timestamp` without timezone)
+- Prefer `jsonb` over `json`
+- Add indexes on search/filter columns and foreign keys
+- Use partial indexes when filtering on a subset (e.g. `WHERE deleted_at IS NULL`)
+- Avoid PostgreSQL enums for evolving domains — prefer `varchar` + check constraint or lookup tables
+- Never edit applied migrations — create a new migration instead
+- Configure via `.env` variables (`POSTGRES_HOST`, `POSTGRES_PORT`,
+  `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`)
+
+## Query guidelines
+
+- Select only required columns — avoid `SELECT *` in application code
+- Use parameterized queries (TypeORM handles this by default)
+- Paginate large result sets (`LIMIT` / `OFFSET` or keyset pagination)

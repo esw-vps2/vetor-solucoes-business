@@ -1,0 +1,119 @@
+---
+description: TypeORM patterns and migrations when persistence is adopted
+globs: backend/**/*
+alwaysApply: false
+---
+
+# TypeORM
+
+Apply this rule when the product requires PostgreSQL persistence and the
+backend has adopted TypeORM.
+
+## Placement
+
+- Follow the backend folder placement in `docs/conventions.md`.
+- Record a persistent-model change in the approved feature specification
+  before implementation, then update `docs/database.md` with the durable
+  resulting model.
+
+- One entity per file, one export per file
+- Register entities in the feature module via `TypeOrmModule.forFeature([Entity])`
+- Shared config lives in `src/config/data-source.ts`
+
+## Entity conventions
+
+- Table names: `snake_case`, plural — `@Entity('users')`
+- TS properties: `camelCase`; map DB columns with `@Column({ name: 'snake_case' })`
+- Primary key: `@PrimaryGeneratedColumn('uuid')`
+- Standard timestamps on every entity: `@CreateDateColumn`, `@UpdateDateColumn`
+- Soft delete: `@DeleteDateColumn({ name: 'deleted_at' })` when required
+- Align with `postgres.mdc` for column types and naming
+
+```typescript
+@Entity('users')
+@Index('uq_users_email', ['email'], { unique: true })
+export class User {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column({ type: 'varchar', length: 255 })
+  email: string;
+
+  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
+  updatedAt: Date;
+}
+```
+
+## Relations
+
+- Define relations explicitly — no eager loading by default
+- Always set `@JoinColumn({ name: 'foreign_key_snake_case' })`
+- Set `onDelete` explicitly (`CASCADE`, `RESTRICT`, or `SET NULL`)
+- Index foreign key columns with `@Index()`
+- Load relations only when needed: `{ relations: ['items'] }` or QueryBuilder `leftJoinAndSelect`
+
+## Repositories and queries
+
+- Inject via `@InjectRepository(Entity)` in services — not in controllers
+- Prefer repository methods for simple queries; use QueryBuilder for complex joins/filters
+- Select only required columns — avoid loading full entities when unnecessary
+- Always paginate list queries (`take` / `skip` or keyset pagination)
+- Never use string interpolation in raw SQL — use parameters
+
+```typescript
+@Injectable()
+export class UsersService {
+  constructor(
+    @InjectRepository(User)
+    private readonly usersRepo: Repository<User>,
+  ) {}
+
+  findAll(page: number, limit: number) {
+    return this.usersRepo.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { createdAt: 'DESC' },
+    });
+  }
+}
+```
+
+## DTOs vs entities
+
+- Controllers receive and return **DTOs** — never expose entities directly
+- Map entity → DTO in the service layer
+- Do not use entity classes as request body types
+
+## Transactions
+
+Wrap multi-step writes in a transaction:
+
+```typescript
+await this.dataSource.transaction(async (manager) => {
+  await manager.save(Order, order);
+  await manager.save(OrderItem, items);
+});
+```
+
+## Migrations
+
+- `synchronize: false` in production — schema changes only via migrations
+- Workflow: update entity → generate migration → review SQL → run
+- Never edit a migration that has already been applied — create a new one
+
+```bash
+npm run migration:generate -- -n CreateUsersTable
+npm run migration:run
+npm run migration:revert
+```
+
+## Avoid
+
+- `synchronize: true` in production
+- Eager relations by default (`{ eager: true }`)
+- Returning TypeORM entities from controllers
+- N+1 queries — use joins or `relations` intentionally
+- Editing applied migration files

@@ -1,0 +1,214 @@
+name: Build images
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  actions: write
+  packages: write
+
+jobs:
+  backend:
+    name: Backend image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
+
+      - name: Prepare image namespace
+        id: image
+        env:
+          REPOSITORY: ${{ github.repository }}
+        run: echo "namespace=ghcr.io/${REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to GHCR
+        if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.5.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build backend image
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+        with:
+          context: .
+          file: infrastructure/dockerfile.backend.yml
+          target: runner
+          push: false
+          load: true
+          tags: |
+            app-backend:${{ github.sha }}
+            ${{ steps.image.outputs.namespace }}/backend:${{ github.sha }}
+            ${{ steps.image.outputs.namespace }}/backend:latest
+          build-args: |
+            APP_VERSION=${{ github.sha }}
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,mode=max,scope=backend
+
+      - name: Report image size
+        env:
+          IMAGE: app-backend:${{ github.sha }}
+        run: |
+          size_bytes="$(docker image inspect "$IMAGE" --format '{{.Size}}')"
+          size_human="$(numfmt --to=iec-i --suffix=B "$size_bytes")"
+          {
+            echo "### Image size"
+            echo ""
+            echo "| Image | Uncompressed size |"
+            echo "| --- | ---: |"
+            echo "| \`${IMAGE}\` | ${size_human} (${size_bytes} bytes) |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Push backend image to GHCR
+        if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
+        env:
+          IMAGE_NAMESPACE: ${{ steps.image.outputs.namespace }}
+        run: |
+          docker push "${IMAGE_NAMESPACE}/backend:${GITHUB_SHA}"
+          docker push "${IMAGE_NAMESPACE}/backend:latest"
+
+  frontend:
+    name: Frontend image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
+
+      - name: Prepare image namespace
+        id: image
+        env:
+          REPOSITORY: ${{ github.repository }}
+        run: echo "namespace=ghcr.io/${REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to GHCR
+        if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.5.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build frontend image
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+        with:
+          context: .
+          file: infrastructure/dockerfile.frontend.yml
+          target: runner
+          push: false
+          load: true
+          tags: |
+            app-frontend:${{ github.sha }}
+            ${{ steps.image.outputs.namespace }}/frontend:${{ github.sha }}
+            ${{ steps.image.outputs.namespace }}/frontend:latest
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL != '' && vars.NEXT_PUBLIC_API_URL || 'http://localhost:3001' }}
+            NEXT_PUBLIC_WHATSAPP_NUMBER=${{ vars.NEXT_PUBLIC_WHATSAPP_NUMBER }}
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,mode=max,scope=frontend
+
+      - name: Report image size
+        env:
+          IMAGE: app-frontend:${{ github.sha }}
+        run: |
+          size_bytes="$(docker image inspect "$IMAGE" --format '{{.Size}}')"
+          size_human="$(numfmt --to=iec-i --suffix=B "$size_bytes")"
+          {
+            echo "### Image size"
+            echo ""
+            echo "| Image | Uncompressed size |"
+            echo "| --- | ---: |"
+            echo "| \`${IMAGE}\` | ${size_human} (${size_bytes} bytes) |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Push frontend image to GHCR
+        if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
+        env:
+          IMAGE_NAMESPACE: ${{ steps.image.outputs.namespace }}
+        run: |
+          docker push "${IMAGE_NAMESPACE}/frontend:${GITHUB_SHA}"
+          docker push "${IMAGE_NAMESPACE}/frontend:latest"
+
+  worker:
+    name: AI worker image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
+
+      - name: Prepare image namespace
+        id: image
+        env:
+          REPOSITORY: ${{ github.repository }}
+        run: echo "namespace=ghcr.io/${REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to GHCR
+        if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.5.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build AI worker image
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+        with:
+          context: .
+          file: infrastructure/dockerfile.worker.yml
+          target: runner
+          push: false
+          load: true
+          tags: |
+            app-ai-worker:${{ github.sha }}
+            ${{ steps.image.outputs.namespace }}/ai-worker:${{ github.sha }}
+            ${{ steps.image.outputs.namespace }}/ai-worker:latest
+          build-args: |
+            APP_VERSION=${{ github.sha }}
+          cache-from: type=gha,scope=ai-worker
+          cache-to: type=gha,mode=max,scope=ai-worker
+
+      - name: Report image size
+        env:
+          IMAGE: app-ai-worker:${{ github.sha }}
+        run: |
+          size_bytes="$(docker image inspect "$IMAGE" --format '{{.Size}}')"
+          size_human="$(numfmt --to=iec-i --suffix=B "$size_bytes")"
+          {
+            echo "### Image size"
+            echo ""
+            echo "| Image | Uncompressed size |"
+            echo "| --- | ---: |"
+            echo "| \`${IMAGE}\` | ${size_human} (${size_bytes} bytes) |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Push AI worker image to GHCR
+        if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
+        env:
+          IMAGE_NAMESPACE: ${{ steps.image.outputs.namespace }}
+        run: |
+          docker push "${IMAGE_NAMESPACE}/ai-worker:${GITHUB_SHA}"
+          docker push "${IMAGE_NAMESPACE}/ai-worker:latest"

@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Ambientes virtuais
+.venv
+venv/
+
+# Variáveis de ambiente (contém segredos)
+.env
+
+# IDE
+.DS_Store
+.vscode/
+.idea/
+.cursor/
+
+# Pytest
+.pytest_cache/
+
+# Logs
+*.log
+
+# Redis
+dump.rdb

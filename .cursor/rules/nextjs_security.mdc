@@ -1,0 +1,518 @@
+---
+description: Security patterns for Next.js applications in the frontend
+globs: frontend/**/*
+alwaysApply: false
+---
+# Security patterns — Next.js
+
+## Objective
+
+Ensure the Next.js application is secure, avoiding exposure of secrets, XSS, incorrect use of authentication, and execution of privileged operations in the browser.
+
+Principles:
+
+- Never trust the client
+- Never expose secrets
+- Secure by default
+- Minimize privileges on the client-side
+- Prefer server-side operations for sensitive actions
+
+---
+
+# 1. Client vs server
+
+Everything executed in the browser must be considered untrusted.
+
+The user can:
+
+- inspect the code;
+- modify requests;
+- alter values;
+- manipulate JavaScript;
+- ignore validations;
+- call APIs directly.
+
+Never implement a security rule only on the frontend.
+
+---
+
+# 2. Secrets
+
+Never put secrets in frontend code.
+
+Never expose:
+
+```text
+DATABASE_URL
+JWT_SECRET
+API_SECRET
+PRIVATE_KEY
+AWS_SECRET_ACCESS_KEY
+```
+
+or any private credential.
+
+Every variable:
+
+```text
+NEXT_PUBLIC_*
+```
+
+must be considered public.
+
+Never put secrets in `NEXT_PUBLIC_*`.
+
+---
+
+# 3. Authentication
+
+Authentication must be validated on the backend.
+
+The frontend may:
+
+- display authenticated state;
+- redirect the user;
+- hide interface elements;
+- present login.
+
+But this **does not constitute security protection**.
+
+Never trust:
+
+```text
+isAuthenticated
+isAdmin
+role
+permissions
+```
+
+stored or controlled exclusively by the frontend.
+
+---
+
+# 4. Authorization
+
+Access control must be enforced on the backend.
+
+The frontend may hide functionality to improve UX:
+
+```text
+Admin
+  ↓
+Show button
+```
+
+But the backend must continue validating:
+
+```text
+User
+ ↓
+Permission
+ ↓
+Action
+```
+
+Never consider a hidden button as an authorization mechanism.
+
+---
+
+# 5. Token storage
+
+Avoid storing sensitive tokens in:
+
+```text
+localStorage
+sessionStorage
+```
+
+without a clear architectural justification.
+
+For web applications, prefer secure cookie-based mechanisms when compatible with the architecture:
+
+```text
+HttpOnly
+Secure
+SameSite
+```
+
+Never put tokens in:
+
+- URL;
+- query string;
+- logs;
+- HTML;
+- public parameters.
+
+---
+
+# 6. XSS
+
+React performs escaping automatically.
+
+Do not bypass this mechanism without need.
+
+Avoid:
+
+```tsx
+dangerouslySetInnerHTML;
+```
+
+When absolutely necessary:
+
+1. Sanitize the content.
+2. Use a trusted library.
+3. Allow only necessary HTML.
+4. Evaluate CSP.
+
+Never insert user-provided content directly into the DOM.
+
+---
+
+# 7. Content Security Policy
+
+Configure CSP when applicable.
+
+Prefer a restrictive policy.
+
+Avoid:
+
+```text
+script-src *
+```
+
+Avoid:
+
+```text
+unsafe-inline
+unsafe-eval
+```
+
+without technical justification.
+
+Do not disable CSP just to make a library work.
+
+---
+
+# 8. Forms
+
+Frontend validation should exist to improve UX.
+
+Example:
+
+```text
+Required fields
+Email format
+Minimum length
+Maximum length
+```
+
+However:
+
+> All security validation must be repeated on the backend.
+
+Never assume the user respected the form rules.
+
+---
+
+# 9. API Calls
+
+Never trust that a call originating from the frontend is legitimate.
+
+The backend must validate:
+
+- authentication;
+- authorization;
+- input;
+- ownership;
+- rate limiting when necessary.
+
+The frontend must not attempt to implement security through headers or parameters controlled by the user.
+
+---
+
+# 10. Error handling
+
+Do not display internal application information.
+
+Avoid showing the user:
+
+```text
+stack trace
+SQL
+database errors
+internal paths
+tokens
+API keys
+```
+
+Prefer friendly messages:
+
+```text
+Could not complete the operation.
+```
+
+Technical details must remain on the backend.
+
+---
+
+# 11. Sensitive data
+
+Do not store or keep sensitive information in frontend state without need.
+
+Avoid keeping:
+
+```text
+password
+refreshToken
+private API keys
+secrets
+```
+
+in global state.
+
+Apply the principle:
+
+> If the UI does not need the data, do not send it to the browser.
+
+---
+
+# 12. Response data
+
+The frontend should consume only the data it needs.
+
+If the API returns unnecessary sensitive data, that must be fixed on the backend.
+
+Do not consider:
+
+```typescript
+delete response.password;
+```
+
+as a security mechanism.
+
+The sensitive data should never have been sent to the browser.
+
+---
+
+# 13. Redirects
+
+Never trust user-controlled URLs directly.
+
+Avoid:
+
+```typescript
+router.push(searchParams.get('redirect'));
+```
+
+without validation.
+
+Validate allowed destinations to prevent Open Redirect.
+
+---
+
+# 14. Server Components
+
+Use Server Components for operations that do not need to run in the browser.
+
+Do not turn a Server Component into a Client Component without need.
+
+Avoid sending to the client:
+
+- sensitive data;
+- secrets;
+- internal information;
+- data not needed for rendering.
+
+---
+
+# 15. Server Actions
+
+Server Actions must be treated as backend code.
+
+Never assume only interface users can call them.
+
+Apply:
+
+- authentication;
+- authorization;
+- validation;
+- ownership;
+- secure error handling.
+
+Do not trust parameters received by the Server Action.
+
+---
+
+# 16. Route Handlers
+
+Route Handlers are HTTP endpoints.
+
+They must apply:
+
+- authentication;
+- authorization;
+- validation;
+- rate limiting when necessary;
+- secure error handling.
+
+Never consider a Route Handler secure just because it is inside the Next.js project.
+
+---
+
+# 17. External URLs
+
+Do not allow user-provided URLs to be used directly in sensitive operations.
+
+When the frontend needs to redirect to an external URL:
+
+- validate the destination when necessary;
+- avoid arbitrary redirects;
+- do not embed untrusted external URLs without need.
+
+---
+
+# 18. Third-party scripts
+
+Avoid unnecessary external scripts.
+
+Before adding:
+
+```text
+analytics
+tracking
+widgets
+scripts
+CDNs
+```
+
+evaluate:
+
+- necessity;
+- origin;
+- permissions;
+- impact on CSP;
+- data sent;
+- supply chain risk.
+
+Do not add unknown external scripts.
+
+---
+
+# 19. Dependencies
+
+Before adding dependencies:
+
+- verify necessity;
+- verify maintenance;
+- verify vulnerabilities;
+- verify provenance;
+- avoid abandoned packages.
+
+Run:
+
+```bash
+npm audit
+```
+
+when applicable.
+
+---
+
+# 20. Browser storage
+
+Do not store sensitive information in:
+
+```text
+localStorage
+sessionStorage
+IndexedDB
+```
+
+without need and justification.
+
+Remember:
+
+> Everything stored in the browser must be considered accessible to the user.
+
+---
+
+# 21. Security headers
+
+When the application controls HTTP headers, consider:
+
+```text
+Content-Security-Policy
+Strict-Transport-Security
+X-Content-Type-Options
+Referrer-Policy
+```
+
+Do not overwrite existing configurations without evaluating the impact.
+
+---
+
+# 22. Security tests
+
+Test relevant behaviors:
+
+- unauthenticated user;
+- user without permission;
+- expired session;
+- invalid content;
+- error messages;
+- authentication states;
+- redirects;
+- protection of administrative functionality.
+
+Do not test security only by checking whether a button is hidden.
+
+---
+
+# 23. Rules for AI Agents
+
+When implementing any functionality:
+
+1. Never put secrets in the frontend.
+2. Never use `NEXT_PUBLIC_*` for private data.
+3. Never trust the frontend for authorization.
+4. Never assume hiding a button protects an operation.
+5. Do not store sensitive tokens in the browser without architectural justification.
+6. Do not use `dangerouslySetInnerHTML` without sanitization.
+7. Do not use `eval` or `new Function`.
+8. Do not add external scripts without evaluating their provenance.
+9. Do not expose sensitive data unnecessarily to the browser.
+10. Do not add `'use client'` without need.
+11. Do not turn Server Components into Client Components just to simplify implementation.
+12. Do not ignore CSP without justification.
+13. Do not trust user parameters for redirects.
+14. Do not implement security rules only on the frontend.
+15. Add tests for relevant security behaviors.
+
+---
+
+# Security checklist
+
+- [ ] No secrets exposed
+- [ ] No secrets in `NEXT_PUBLIC_*`
+- [ ] Authentication does not depend solely on the frontend
+- [ ] Authorization does not depend solely on the frontend
+- [ ] Tokens stored appropriately
+- [ ] Sensitive data is not sent unnecessarily
+- [ ] XSS evaluated
+- [ ] `dangerouslySetInnerHTML` avoided or sanitized
+- [ ] CSP configured when applicable
+- [ ] Redirects validated
+- [ ] Server Actions protected
+- [ ] Route Handlers protected
+- [ ] External scripts evaluated
+- [ ] Dependencies evaluated
+- [ ] Errors do not expose internal information
+- [ ] Relevant security tests implemented
+
+---
+
+# Fundamental Principle
+
+> The frontend is an untrusted environment.
+
+The frontend can improve UX and hide functionality, but **all authentication, authorization, and security rules must be enforced by the backend**.
