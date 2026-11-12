@@ -11,6 +11,10 @@ alwaysApply: true
   consumption
 - **Backend** (`backend/`) — NestJS API, domain logic, and server-side
   integrations
+- **AI worker** (`worker-proxy-agent-ia/`) — isolated worker process for the
+  AI execution boundary
+- **Power BI integration** (`ms-powerbi-embedded/`) — Python service reached
+  through the backend
 - **Infrastructure** (`infrastructure/`) — Docker Compose, Dockerfiles, and
   local PostgreSQL
 
@@ -21,7 +25,7 @@ alwaysApply: true
   controllers.
 - Validate external input at the backend HTTP boundary.
 - Follow `docs/conventions.md` for file placement.
-- Follow an approved `docs/specs/` specification for feature scope, behavior,
+- Follow an approved `tasks/specs/` specification for feature scope, behavior,
   and acceptance criteria.
 - Use `docs/product.md` and `docs/design.md` for durable global decisions.
 - Update `docs/api.md`, `openapi.yaml`, and Swagger at `/api/docs` when an
@@ -37,7 +41,7 @@ alwaysApply: true
 Browser -> Next.js -> NestJS API -> Persistence when required
 ```
 
-## Agent skills
+## Agent guidance
 
-- Frontend: `frontend/.agents/`
-- Backend: `backend/.agents/`
+- Shared skills: `.agents/skills/`
+- Project SDD governance: `.agents/sdd/`

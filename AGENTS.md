@@ -5,36 +5,35 @@ the project contracts, rules, and skills that govern agent work.
 
 ## Project context
 
-- `frontend/` — Next.js, React, TypeScript, and Tailwind
-- `backend/` — NestJS API and domain logic
+- `frontend/` — Next.js, React, TypeScript, and Tailwind application
+- `backend/` — NestJS API, domain logic, authorization, repositories, and persistence
+- `worker-proxy-agent-ia/` — NestJS AI worker process
+- `ms-powerbi-embedded/` — Python Power BI integration service
 - `infrastructure/` — Docker Compose, Dockerfiles, and PostgreSQL
-- `docs/` — feature specifications, global contracts, conventions, and decisions
+- `docs/` — global contracts, conventions, and durable decisions
+- `tasks/` — feature specifications, plans, and task lists
 - `.cursor/rules/` — persistent repository guidance
-- `frontend/.agents/` — frontend guide and skills
-- `backend/.agents/` — backend guide and skills
+- `.agents/skills/` — canonical repository skill registry, catalogs, and profiles
+- `.agents/sdd/` — project-specific SDD lifecycle and governance
 
 ## Before implementation
 
 1. Read this file.
-2. For product behavior, read the relevant approved feature specification in
-   [`docs/specs/`](docs/specs/) and
-   [`docs/sdd/lifecycle.md`](docs/sdd/lifecycle.md) and
-   [`docs/sdd/decision-authority.md`](docs/sdd/decision-authority.md). Do
-   not implement a `draft` or `in_review` specification. When working in an
-   SDD role, read [`docs/sdd/agents.yml`](docs/sdd/agents.yml) and use that
-   role's `model` and `effort`.
+2. For product behavior, read the relevant approved specification in
+   [`tasks/specs/`](tasks/specs/), the applicable governance in
+   [`.agents/sdd/`](.agents/sdd/), and the installed
+   [`spec-driven-development`](.agents/skills/profiles/architecture/spec-driven-development/SKILL.md)
+   skill. Do not implement a `draft` or `in_review` specification.
 3. Read only the global contract that applies to the work:
    - [`docs/product.md`](docs/product.md) for durable product decisions
    - [`docs/design.md`](docs/design.md) for shared visual decisions
    - [`docs/api.md`](docs/api.md) for the consolidated HTTP contract
-   - [`openapi.yaml`](openapi.yaml) for the machine-readable HTTP contract
    - [`docs/database.md`](docs/database.md) for the shared persistent model
    - [`docs/conventions.md`](docs/conventions.md) for file placement
-4. Read the matching Cursor rules and workspace skill.
-5. Treat an empty or `TBD` business or security field as undecided and ask.
-   Do not invent product scope or security policy. Decide missing design
-   and technical how as a senior engineer, record it in the specification,
-   and promote recurring visual decisions into `docs/design.md`.
+4. Read the matching Cursor rules and the selected root skill(s) from
+   [`.agents/skills/`](.agents/skills/).
+5. Treat an empty or `TBD` business or security field as undecided and return
+   it to specification review instead of inventing scope or policy.
 6. Implement the smallest change that fulfills the approved specification,
    promote affected global decisions, and run the relevant quality checks.
 
@@ -42,8 +41,8 @@ the project contracts, rules, and skills that govern agent work.
 
 When sources conflict, use this order:
 
-1. Explicit business or security requirement confirmed by the user
-2. Approved feature specification in `docs/specs/`
+1. Explicit requirement confirmed by the user
+2. Approved specification in `tasks/specs/`
 3. Product, design, API, and data-model decisions in `docs/`
 4. Architecture and security rules
 5. Layer-specific rules
@@ -77,6 +76,18 @@ For files in `backend/`, use:
 - [`api-contract.mdc`](.cursor/rules/api-contract.mdc)
 - [`typescript-style.mdc`](.cursor/rules/typescript-style.mdc)
 
+For files in `worker-proxy-agent-ia/`, also use:
+
+- [`nestjs.mdc`](.cursor/rules/nestjs.mdc)
+- [`nestjs_security.mdc`](.cursor/rules/nestjs_security.mdc)
+- [`nestjs_testing.mdc`](.cursor/rules/nestjs_testing.mdc)
+- [`api-contract.mdc`](.cursor/rules/api-contract.mdc)
+- [`typescript-style.mdc`](.cursor/rules/typescript-style.mdc)
+
+Apply [`typeorm.mdc`](.cursor/rules/typeorm.mdc) and
+[`postgres.mdc`](.cursor/rules/postgres.mdc) only when the backend persistence
+model requires them.
+
 ### Frontend
 
 For files in `frontend/`, use:
@@ -84,32 +95,48 @@ For files in `frontend/`, use:
 - [`nextjs.mdc`](.cursor/rules/nextjs.mdc)
 - [`nextjs_security.mdc`](.cursor/rules/nextjs_security.mdc)
 - [`nextjs_testing.mdc`](.cursor/rules/nextjs_testing.mdc)
-- [`api-contract.mdc`](.cursor/rules/api-contract.mdc)
+- [`api-contract.mdc`](.cursor/rules/api-contract.mdc) for files in `frontend/lib/api/`
 - [`typescript-style.mdc`](.cursor/rules/typescript-style.mdc)
 
 ## Skills
 
+The canonical skill registry is [`.agents/skills/`](.agents/skills/). Before
+selecting skills, read [`skills-catalog.yaml`](.agents/skills/skills-catalog.yaml),
+[`agent-profiles.yaml`](.agents/skills/agent-profiles.yaml), and
+[`workflow.yaml`](.agents/skills/workflow.yaml). Skills are loaded on demand
+after the primary profile is selected.
+
+For specification-driven work, use:
+
+- [`spec-driven-development`](.agents/skills/profiles/architecture/spec-driven-development/SKILL.md)
+- [`planning-and-task-breakdown`](.agents/skills/profiles/architecture/planning-and-task-breakdown/SKILL.md)
+- [`sdd-implement`](.agents/skills/task/sdd-implement/SKILL.md)
+
+Persist specifications in `tasks/specs/`, plans in `tasks/plan.md`, and task
+lists in `tasks/todo.md`.
+
 ### Frontend
 
-Read [`frontend/.agents/SKILL.md`](frontend/.agents/SKILL.md) and, when
-applicable:
+For frontend work, select the `frontend` profile and read the relevant skills:
 
-- [`frontend/.agents/AGENTS.md`](frontend/.agents/AGENTS.md)
-- [`frontend/.agents/skills/ui.md`](frontend/.agents/skills/ui.md)
-- [`frontend/.agents/skills/seo.md`](frontend/.agents/skills/seo.md)
-- [`frontend/.agents/skills/security.md`](frontend/.agents/skills/security.md)
-- [`frontend/.agents/skills/testing.md`](frontend/.agents/skills/testing.md)
-- [`frontend/.agents/skills/vercel-react-best-practices/SKILL.md`](frontend/.agents/skills/vercel-react-best-practices/SKILL.md)
+- [`frontend-engineering`](.agents/skills/profiles/frontend/frontend-engineering/SKILL.md)
+- [`vercel-react-best-practices`](.agents/skills/profiles/frontend/vercel-react-best-practices/SKILL.md)
+- [`vercel-composition-patterns`](.agents/skills/profiles/frontend/vercel-composition-patterns/SKILL.md)
+- [`web-design-guidelines`](.agents/skills/profiles/frontend/web-design-guidelines/SKILL.md)
 
 Use the Vercel skill only when the task involves measurable performance,
 rendering, data fetching, hydration, or bundle-size work.
 
 ### Backend
 
-Read [`backend/.agents/SKILL.md`](backend/.agents/SKILL.md) and
-[`backend/.agents/AGENTS.md`](backend/.agents/AGENTS.md). Then read the
-relevant topic in
-[`backend/.agents/skills/nestjs-best-practices/`](backend/.agents/skills/nestjs-best-practices/).
+For backend and worker work, select the `backend` profile and read the relevant
+skills:
+
+- [`backend-engineering`](.agents/skills/profiles/backend/backend-engineering/SKILL.md)
+- [`nestjs-best-practices`](.agents/skills/profiles/backend/nestjs-best-practices/SKILL.md)
+
+Select shared skills from `.agents/skills/core/`, `.agents/skills/hybrid/`, and
+`.agents/skills/task/` only when their task triggers apply.
 
 ## Work by layer
 
@@ -123,10 +150,16 @@ relevant topic in
 
 ### Backend
 
-- Keep HTTP concerns in controllers and business rules in services.
+- Keep Core API HTTP concerns in controllers and business rules in services.
 - Validate external input at the HTTP boundary.
 - Use DTOs and avoid exposing persistence entities directly.
 - Adopt TypeORM and migrations only when the product has a persistent model.
+
+### Worker
+
+- Keep AI worker process concerns separate from backend domain rules.
+- Use the documented worker contract and preserve the backend ownership of
+  product persistence.
 
 ### Infrastructure
 

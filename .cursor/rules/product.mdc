@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Product and design contracts
 
-- An approved specification under `docs/specs/` is the source of truth for
+- An approved specification under `tasks/specs/` is the source of truth for
   feature behavior, routes, content, claims, integrations, business rules,
   and visual acceptance criteria.
 - `docs/product.md` records durable product-wide decisions.

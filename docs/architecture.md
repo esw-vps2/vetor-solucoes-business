@@ -35,17 +35,17 @@ Human prompt -> Draft specification -> Human approval -> Delivery agents -> Vali
 ```
 
 A human prompt in an agent conversation is the only intake channel. Each
-prompt is normalized into a versioned specification under `docs/specs/`.
+prompt is normalized into a versioned specification under `tasks/specs/`.
 Delivery agents may implement only an approved specification. Humans decide
 business and security; agents decide design and technical how as senior
-engineers. See [`docs/sdd/`](./sdd/) for the lifecycle, responsibilities,
-decision authority, and adapter contract.
+engineers. See [`.agents/sdd/`](../.agents/sdd/) for the lifecycle,
+responsibilities, decision authority, and adapter contract.
 
 ## Boundaries
 
 - Business logic belongs in backend services.
 - Feature behavior, acceptance criteria, and delivery evidence belong in an
-  approved specification under `docs/specs/`.
+  approved specification under `tasks/specs/`.
 - The consolidated HTTP contract is documented in `docs/api.md`, with
   Swagger at `/api/docs` and the versioned OpenAPI document in
   [`openapi.yaml`](../openapi.yaml).
@@ -58,8 +58,8 @@ decision authority, and adapter contract.
 ## References
 
 - Product scope: [`product.md`](./product.md)
-- SDD core: [`sdd/`](./sdd/)
-- Feature specifications: [`specs/`](./specs/)
+- SDD core: [`.agents/sdd/`](../.agents/sdd/)
+- Feature specifications: [`tasks/specs/`](../tasks/specs/)
 - Visual decisions: [`design.md`](./design.md)
 - HTTP contract: [`api.md`](./api.md)
 - OpenAPI: [`../openapi.yaml`](../openapi.yaml)

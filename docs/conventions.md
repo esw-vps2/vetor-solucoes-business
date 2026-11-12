@@ -1,31 +1,33 @@
 # Project conventions
 
 This document is the source of truth for folder placement in the monorepo.
-Approved feature behavior belongs in `docs/specs/`. Durable product, design,
+Approved feature behavior belongs in `tasks/specs/`. Durable product, design,
 API, and data-model decisions belong in their matching contracts under
 `docs/`.
 
 ## Spec-Driven Development
 
 ```text
-docs/
+.agents/
 ├── sdd/
 │   ├── adapters.md
 │   ├── agents.yml
 │   ├── configuration.md
 │   ├── lifecycle.md
 │   └── roles.md
+└── skills/
+tasks/
 └── specs/
     ├── _template.md
     └── <feature-slug>.md
 ```
 
-- Copy `docs/specs/_template.md` to create a feature specification.
+- Copy `tasks/specs/_template.md` to create a feature specification.
 - Use lowercase kebab-case file names, prefixed with the specification id,
   such as `vetor-001-create-profile.md`.
 - Do not edit a specification outside its lifecycle state.
 - Intake is a human prompt only. Do not add GitHub, Kanban, webhook, or other
-  input-platform adapters unless `docs/sdd/configuration.md` is updated.
+  input-platform adapters unless `.agents/sdd/configuration.md` is updated.
 
 ## Canonical folder structure
 
@@ -81,6 +83,7 @@ The root owns shared configuration:
 - `.prettierrc`, `.editorconfig`, and `.nvmrc`
 - `.github/workflows/` for repository automation
 - `.cursor/rules/` for persistent agent guidance
+- `.agents/` for shared skills and project SDD governance
 
 ## Environment variables
 
@@ -113,8 +116,9 @@ tracking, but it is not required by this template.
 
 ## Agent skills
 
-- Frontend: `frontend/.agents/`
-- Backend: `backend/.agents/`
+- Frontend: `.agents/skills/profiles/frontend/`
+- Backend and worker: `.agents/skills/profiles/backend/`
+- Shared: `.agents/skills/core/` and `.agents/skills/hybrid/`
 
 ## Documented flows
 

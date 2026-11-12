@@ -8,11 +8,11 @@ alwaysApply: true
 ## Required gate
 
 - New or changed product behavior requires a related specification in
-  `docs/specs/` with `status: approved`.
+  `tasks/specs/` with `status: approved`.
 - Do not implement a specification with `draft`, `in_review`, or `superseded`
   status.
-- Read `docs/sdd/lifecycle.md`, `docs/sdd/roles.md`,
-  `docs/sdd/decision-authority.md`, and `docs/sdd/agents.yml` before working
+- Read `.agents/sdd/lifecycle.md`, `.agents/sdd/roles.md`,
+  `.agents/sdd/decision-authority.md`, and `.agents/sdd/agents.yml` before working
   on a feature specification.
 - Run `npm run sdd:validate` whenever a specification changes.
 
@@ -20,7 +20,7 @@ alwaysApply: true
 
 - Keep one assigned SDD role per deliverable.
 - When starting a dedicated chat or launching a subagent for an SDD role,
-  read [`docs/sdd/agents.yml`](docs/sdd/agents.yml) and use that role's
+  read [`.agents/sdd/agents.yml`](../../.agents/sdd/agents.yml) and use that role's
   `model` and `effort`. Do not invent or substitute a model unless a human
   overrides the assignment in the current prompt.
 - The `human_approver` role is never an LLM.
@@ -34,7 +34,7 @@ alwaysApply: true
   items `TBD`.
 - Decide missing design and technical how as a senior engineer, record the
   choice in the specification, and promote recurring visual decisions into
-  `docs/design.md`. See `docs/sdd/decision-authority.md`.
+  `docs/design.md`. See `.agents/sdd/decision-authority.md`.
 
 ## Contract hierarchy
 
@@ -59,4 +59,4 @@ alwaysApply: true
 - Do not create specifications from GitHub Issues, Kanban cards, webhooks,
   or other systems.
 - Do not add a channel-specific workflow, secret, credential, or integration
-  unless a human updates `docs/sdd/configuration.md`.
+  unless a human updates `.agents/sdd/configuration.md`.

@@ -219,7 +219,7 @@ export async function validateSpecifications(specificationsDirectory) {
 
 async function run() {
   const scriptDirectory = fileURLToPath(new URL('.', import.meta.url));
-  const specificationsDirectory = join(scriptDirectory, '../../docs/specs');
+  const specificationsDirectory = join(scriptDirectory, '../../tasks/specs');
   const { issues, specificationFiles } = await validateSpecifications(specificationsDirectory);
 
   if (issues.length > 0) {

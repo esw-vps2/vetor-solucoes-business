@@ -4,7 +4,7 @@ Use this document when the project requires persistent data. It records the
 durable, cross-feature data model and lifecycle decisions.
 
 Feature-specific data changes, migrations, retention implications, and
-acceptance criteria live in the approved specification under `docs/specs/`.
+acceptance criteria live in the approved specification under `tasks/specs/`.
 Promote a decision here only when it changes the shared model or policy.
 
 Source for this decision: the extracted `tmp/vetor` leadpage has no API, no

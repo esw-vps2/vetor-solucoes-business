@@ -1,0 +1,184 @@
+version: "1.0"
+
+name: Vetor Agent Workflow
+
+references:
+  skills_catalog: .agents/skills/skills-catalog.yaml
+  agent_profiles: .agents/skills/agent-profiles.yaml
+  project_guidance: AGENTS.md
+  sdd_governance: .agents/sdd/configuration.md
+  specification_skill: .agents/skills/profiles/architecture/spec-driven-development/SKILL.md
+  planning_skill: .agents/skills/profiles/architecture/planning-and-task-breakdown/SKILL.md
+  implementation_skill: .agents/skills/task/sdd-implement/SKILL.md
+
+project_workspaces:
+  - backend
+  - frontend
+  - worker-proxy-agent-ia
+  - ms-powerbi-embedded
+
+defaults:
+  orchestrator: project-orchestrator
+  skill_loading: on-demand
+  agent_execution: delegated
+  preserve_project_context: true
+
+selection:
+  profile_required: true
+  primary_profile_required: true
+  skill_resolution_order:
+    - core
+    - hybrid
+    - profile
+    - task
+  rules:
+    - Classify the request before loading skills.
+    - Select one primary profile for the task.
+    - Load only relevant skills with active status.
+    - Resolve skill references before loading them.
+    - Deduplicate skills by skill identifier.
+    - Keep the selected scope aligned with the user request.
+    - Treat human-approved specifications, project contracts, and
+      `.cursor/rules/` as higher authority than community skills.
+    - Use the installed specification, planning, and implementation skills as
+      the canonical delivery workflow.
+    - Store specifications in `tasks/specs/`, plans in `tasks/plan.md`, and
+      task lists in `tasks/todo.md`.
+
+stages:
+  - id: intake
+    required: true
+    actions:
+      - normalize_request
+      - classify_task
+      - identify_affected_layers
+    outputs:
+      - task_classification
+      - affected_layers
+
+  - id: profile-selection
+    required: true
+    actions:
+      - select_primary_profile
+      - select_supporting_agents
+    outputs:
+      - primary_profile
+      - supporting_agents
+
+  - id: skill-resolution
+    required: true
+    actions:
+      - resolve_core_skills
+      - resolve_hybrid_skills
+      - resolve_profile_skills
+      - resolve_task_skills
+      - record_unavailable_skills
+    outputs:
+      - resolved_skills
+      - unavailable_skills
+
+  - id: specification
+    required_when: product_behavior_changes
+    reference: .agents/skills/profiles/architecture/spec-driven-development/SKILL.md
+    actions:
+      - inspect_related_specification
+      - confirm_scope_and_acceptance_criteria
+      - return_ambiguous_scope_to_review
+    gate:
+      implementation_requires_human_approval: true
+      approval_owner: human
+
+  - id: planning
+    required: true
+    reference: .agents/skills/profiles/architecture/planning-and-task-breakdown/SKILL.md
+    actions:
+      - define_smallest_implementation
+      - identify_file_changes
+      - define_validation_evidence
+    outputs:
+      - implementation_plan
+      - task_breakdown
+
+  - id: implementation
+    required: true
+    actions:
+      - implement_approved_scope
+      - preserve_layer_boundaries
+      - update_affected_contracts
+      - add_or_update_tests
+    gate:
+      requires:
+        - primary_profile
+        - resolved_skills
+        - implementation_plan
+      product_behavior_requires:
+        - human_approved_specification
+
+  - id: verification
+    required: true
+    actions:
+      - inspect_diff
+      - run_applicable_checks
+      - verify_security_requirements
+      - record_command_results
+    outputs:
+      - verification_evidence
+
+  - id: review
+    required: true
+    actions:
+      - request_code_review
+      - resolve_blocking_findings
+      - confirm_scope_compliance
+
+  - id: completion
+    required: true
+    actions:
+      - confirm_changed_files
+      - confirm_tests_and_checks
+      - confirm_documentation_updates
+      - report_unresolved_limitations
+
+delegation:
+  enabled: true
+  allow_multiple_agents: true
+  rules:
+    - Assign one primary agent to own the implementation.
+    - Use supporting agents only for independent expertise or validation.
+    - Keep delegated work within the approved scope.
+    - Preserve the same project context across delegated work.
+
+specification_workflow:
+  enabled: true
+  required_when: product_behavior_changes
+  require_approved_specification_before_implementation: true
+  require_approved_plan: true
+  require_task_breakdown: true
+  require_verification: true
+
+verification:
+  evidence_required: true
+  checks:
+    source_code_changed:
+      - npm run typecheck
+      - npm run lint
+      - npm run test
+      - npm run build
+    integration_or_transport_changed:
+      - npm run test:e2e
+    configuration_or_documentation_changed:
+      - npm run format:check
+  rules:
+    - Run only checks relevant to the changed workspaces and files.
+    - Record every executed command and its outcome.
+    - Do not report a check as passed without current-session evidence.
+    - Fix introduced failures when the cause is within the task scope.
+
+completion:
+  require_tests_when: source_code_changed
+  require_code_review: true
+  require_documentation_update: true
+  require_evidence: true
+  failure_policy:
+    - Do not mark the task complete while a required check is failing.
+    - Report unavailable commands as not run with the reason.

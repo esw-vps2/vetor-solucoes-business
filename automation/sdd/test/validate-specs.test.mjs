@@ -1,9 +1,13 @@
 import assert from 'node:assert/strict';
+import { execFile } from 'node:child_process';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { promisify } from 'node:util';
 import test from 'node:test';
 import { validateSpecification, validateSpecifications } from '../validate-specs.mjs';
+
+const execFileAsync = promisify(execFile);
 
 function createSpecification(status, overrides = {}) {
   const values = {
@@ -204,4 +208,14 @@ test('ignores specification templates when validating a directory', async () => 
   } finally {
     await rm(directory, { force: true, recursive: true });
   }
+});
+
+test('validates the repository specifications from tasks/specs', async () => {
+  const { stdout } = await execFileAsync(
+    process.execPath,
+    [join(process.cwd(), 'automation/sdd/validate-specs.mjs')],
+    { cwd: process.cwd() },
+  );
+
+  assert.match(stdout, /Validated 41 feature specification\(s\)\./);
 });

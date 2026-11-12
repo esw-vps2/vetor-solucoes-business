@@ -4,7 +4,7 @@ This document records durable, project-wide visual decisions. It is optional
 until the project adopts a visual system or approved design reference.
 
 Feature-specific screen behavior, states, and acceptance criteria live in the
-approved specification under `docs/specs/`. Promote a decision here only when
+approved specification under `tasks/specs/`. Promote a decision here only when
 it changes the shared visual system, a reusable component, or a global asset.
 
 Source for this visual system: the implemented leadpage. The layout structure

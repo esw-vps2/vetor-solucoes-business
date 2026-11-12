@@ -19,14 +19,14 @@ and implementation scope ambiguous.
 
 The template provides a channel-agnostic SDD core:
 
-- versioned feature specifications under `docs/specs/`;
+- versioned feature specifications under `tasks/specs/`;
 - a lifecycle that requires human approval before implementation;
 - defined role responsibilities and authority limits;
 - an adapter contract that normalizes project-specific intake;
 - local validation of specification structure and approval readiness.
 
 Projects choose and configure their intake adapter in
-`docs/sdd/configuration.md`. The template does not include active GitHub,
+`.agents/sdd/configuration.md`. The template does not include active GitHub,
 Kanban, Cursor Cloud, webhook, or credential-based automations.
 
 The global product, design, API, and data-model documents remain durable

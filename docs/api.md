@@ -3,7 +3,7 @@
 This document records the durable HTTP contract exposed by the project.
 
 Feature-specific endpoint changes start in an approved specification under
-`docs/specs/`. Update this document in the same delivery when the specification
+`tasks/specs/`. Update this document in the same delivery when the specification
 adds or changes a published endpoint, payload, response, error, or
 authentication decision.
 

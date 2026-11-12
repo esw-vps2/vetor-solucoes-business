@@ -1,0 +1,164 @@
+
+version: "1.1"
+
+defaults:
+  orchestrator: project-orchestrator
+  skill_loading: on-demand
+  agent_execution: delegated
+  require_specification_workflow: true
+
+profiles:
+  backend:
+    name: Backend
+    description: APIs, services, business rules, integrations, and persistence.
+
+    agents:
+      primary:
+        - backend-engineer
+
+      supporting:
+        - requirements-analyst
+        - technical-planner
+        - api-specialist
+        - database-specialist
+        - distributed-systems-specialist
+        - observability-engineer
+        - integration-engineer
+        - test-engineer
+        - code-reviewer
+        - security-auditor
+
+    skills:
+      core:
+        - brainstorming
+        - systematic-debugging
+        - test-driven-development
+        - verification-before-completion
+        - requesting-code-review
+        - security-review
+
+      hybrid:
+        - api-design
+        - database-design
+        - distributed-systems
+        - observability
+        - documentation
+        - performance-optimization
+        - integration-testing
+
+      profile:
+        - backend-engineering
+        - nestjs-best-practices
+
+  frontend:
+    name: Frontend
+    description: Interfaces, components, user experiences, and API consumption.
+
+    agents:
+      primary:
+        - frontend-engineer
+
+      supporting:
+        - requirements-analyst
+        - technical-planner
+        - api-specialist
+        - observability-engineer
+        - integration-engineer
+        - test-engineer
+        - code-reviewer
+        - security-auditor
+
+    skills:
+      core:
+        - brainstorming
+        - systematic-debugging
+        - test-driven-development
+        - verification-before-completion
+        - requesting-code-review
+        - security-review
+
+      hybrid:
+        - api-design
+        - observability
+        - documentation
+        - performance-optimization
+        - integration-testing
+
+      profile:
+        - frontend-engineering
+        - vercel-react-best-practices
+        - vercel-composition-patterns
+        - web-design-guidelines
+
+  architecture:
+    name: Architecture
+    description: Solution architecture, technical decisions, and engineering governance.
+
+    agents:
+      primary:
+        - solution-architect
+
+      supporting:
+        - requirements-analyst
+        - technical-planner
+        - api-specialist
+        - database-specialist
+        - distributed-systems-specialist
+        - observability-engineer
+        - performance-engineer
+        - architecture-reviewer
+        - security-auditor
+        - documentation-specialist
+
+    skills:
+      core:
+        - brainstorming
+        - systematic-debugging
+        - verification-before-completion
+        - security-review
+
+      hybrid:
+        - api-design
+        - database-design
+        - distributed-systems
+        - observability
+        - documentation
+        - performance-optimization
+        - integration-testing
+
+      profile:
+        - system-design
+        - improve-codebase-architecture
+        - grill-me
+        - adr-authoring
+        - spec-driven-development
+        - planning-and-task-breakdown
+
+shared_agents:
+  - project-orchestrator
+  - code-reviewer
+  - test-engineer
+
+task_skills:
+  - skill-creator
+  - sdd-implement
+
+execution:
+  require_profile_selection: true
+  allow_agent_delegation: true
+  allow_multiple_agents: true
+  load_skills_on_demand: true
+  preserve_project_context: true
+
+  specification_workflow:
+    enabled: true
+    require_specification: true
+    require_approved_plan: true
+    require_task_breakdown: true
+    require_verification: true
+
+  completion:
+    require_tests: true
+    require_code_review: true
+    require_documentation_update: true
+    require_evidence: true

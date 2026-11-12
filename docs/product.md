@@ -4,7 +4,7 @@ This document records durable, project-wide product decisions. It is not the
 delivery contract for an individual feature.
 
 Feature-specific requirements, acceptance criteria, and delivery evidence live
-in approved specifications under `docs/specs/`. Promote a decision here only
+in approved specifications under `tasks/specs/`. Promote a decision here only
 when it affects the product beyond one feature.
 
 Source for the leadpage: extracted from `tmp/vetor` (Next.js marketing site)

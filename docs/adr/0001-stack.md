@@ -18,7 +18,8 @@ Use npm workspaces with:
 - `backend/` for NestJS HTTP APIs and domain logic
 - `infrastructure/` for Docker Compose, PostgreSQL, and Dockerfiles
 - `.cursor/rules/` for repository guidance
-- `frontend/.agents/` and `backend/.agents/` for layer-specific skills
+- `.agents/skills/` for shared and layer-specific skills
+- `.agents/sdd/` for project-specific SDD governance
 - `docs/` for approved product, design, API, data-model, and architectural
   decisions
 

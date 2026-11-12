@@ -1,0 +1,277 @@
+version: "1.1"
+
+name: Vetor Skills Catalog
+root: .agents/skills
+skill_file: SKILL.md
+activation: on-demand
+
+status:
+  planned: Referenced by the workflow but not implemented or verified yet.
+  active: The skill contains a maintained SKILL.md and can be loaded.
+  deprecated: The skill must not be loaded for new work.
+
+categories:
+  core:
+    path: core
+    scope: shared
+    description: Cross-cutting skills available to every engineering profile.
+    skills:
+      brainstorming:
+        path: core/brainstorming
+        status: active
+        source: community
+        repository: obra/superpowers
+        upstream_skill: brainstorming
+        profiles:
+          - backend
+          - frontend
+          - architecture
+      systematic-debugging:
+        path: core/systematic-debugging
+        status: active
+        source: community
+        repository: obra/superpowers
+        upstream_skill: systematic-debugging
+        profiles:
+          - backend
+          - frontend
+          - architecture
+      writing-plans:
+        path: core/writing-plans
+        status: active
+        source: community
+        repository: obra/superpowers
+        upstream_skill: writing-plans
+      test-driven-development:
+        path: core/test-driven-development
+        status: active
+        source: community
+        repository: obra/superpowers
+        upstream_skill: test-driven-development
+        profiles:
+          - backend
+          - frontend
+          - architecture
+      verification-before-completion:
+        path: core/verification-before-completion
+        status: active
+        source: community
+        repository: obra/superpowers
+        upstream_skill: verification-before-completion
+        profiles:
+          - backend
+          - frontend
+          - architecture
+      requesting-code-review:
+        path: core/requesting-code-review
+        status: active
+        source: community
+        repository: obra/superpowers
+        upstream_skill: requesting-code-review
+        profiles:
+          - backend
+          - frontend
+          - architecture
+      security-review:
+        path: core/security-review
+        status: active
+        source: community
+        repository: getsentry/skills
+        upstream_skill: security-review
+        profiles:
+          - backend
+          - frontend
+          - architecture
+      skill-creator:
+        path: core/skill-creator
+        status: active
+        source: community
+        repository: anthropics/skills
+        upstream_skill: skill-creator
+        profiles:
+          - backend
+          - frontend
+          - architecture
+
+  hybrid:
+    path: hybrid
+    scope: domain
+    description: Domain skills selected in addition to a primary engineering profile.
+    skills:
+      api-design:
+        path: hybrid/api-design
+        status: active
+        source: community
+        repository: addyosmani/agent-skills
+        upstream_skill: api-and-interface-design
+        profiles:
+          - backend
+          - frontend
+          - architecture
+      database-design:
+        path: hybrid/database-design
+        status: active
+        source: internal
+        profiles:
+          - backend
+          - architecture
+      distributed-systems:
+        path: hybrid/distributed-systems
+        status: active
+        source: community
+        repository: wshobson/agents
+        upstream_skill: microservices-patterns
+        profiles:
+          - backend
+          - architecture
+      observability:
+        path: hybrid/observability
+        status: active
+        source: community
+        repository: addyosmani/agent-skills
+        upstream_skill: observability-and-instrumentation
+        profiles:
+          - backend
+          - frontend
+          - architecture
+      documentation:
+        path: hybrid/documentation
+        status: active
+        source: community
+        repository: addyosmani/agent-skills
+        upstream_skill: documentation-and-adrs
+        profiles:
+          - backend
+          - frontend
+          - architecture
+      performance-optimization:
+        path: hybrid/performance-optimization
+        status: active
+        source: community
+        repository: addyosmani/agent-skills
+        upstream_skill: performance-optimization
+        profiles:
+          - backend
+          - frontend
+          - architecture
+      integration-testing:
+        path: hybrid/integration-testing
+        status: active
+        source: internal
+        profiles:
+          - backend
+          - frontend
+          - architecture
+
+  profile:
+    path: profiles
+    scope: profile-specific
+    description: Skills that specialize the selected engineering profile.
+    bundles:
+      backend:
+        path: profiles/backend
+        status: active
+        skills:
+          backend-engineering:
+            path: profiles/backend/backend-engineering
+            status: active
+            source: internal
+          nestjs-best-practices:
+            path: profiles/backend/nestjs-best-practices
+            status: active
+            source: community
+            repository: kadajett/agent-nestjs-skills
+            upstream_skill: nestjs-best-practices
+      frontend:
+        path: profiles/frontend
+        status: active
+        skills:
+          frontend-engineering:
+            path: profiles/frontend/frontend-engineering
+            status: active
+            source: community
+            repository: anthropics/skills
+            upstream_skill: frontend-design
+          vercel-react-best-practices:
+            path: profiles/frontend/vercel-react-best-practices
+            status: active
+            source: community
+            repository: vercel-labs/agent-skills
+            upstream_skill: vercel-react-best-practices
+          vercel-composition-patterns:
+            path: profiles/frontend/vercel-composition-patterns
+            status: active
+            source: community
+            repository: vercel-labs/agent-skills
+            upstream_skill: vercel-composition-patterns
+          web-design-guidelines:
+            path: profiles/frontend/web-design-guidelines
+            status: active
+            source: community
+            repository: vercel-labs/agent-skills
+            upstream_skill: web-design-guidelines
+      architecture:
+        path: profiles/architecture
+        status: active
+        skills:
+          system-design:
+            path: profiles/architecture/system-design
+            status: active
+            source: community
+            repository: jwynia/agent-skills
+            upstream_skill: system-design
+          improve-codebase-architecture:
+            path: profiles/architecture/improve-codebase-architecture
+            status: active
+            source: community
+            repository: mattpocock/skills
+            upstream_skill: improve-codebase-architecture
+          grill-me:
+            path: profiles/architecture/grill-me
+            status: active
+            source: community
+            repository: mattpocock/skills
+            upstream_skill: grill-me
+          adr-authoring:
+            ref: categories.hybrid.skills.documentation
+            status: active
+          spec-driven-development:
+            path: profiles/architecture/spec-driven-development
+            status: active
+            source: community
+            repository: addyosmani/agent-skills
+            upstream_skill: spec-driven-development
+          planning-and-task-breakdown:
+            path: profiles/architecture/planning-and-task-breakdown
+            status: active
+            source: community
+            repository: addyosmani/agent-skills
+            upstream_skill: planning-and-task-breakdown
+
+  task:
+    path: task
+    scope: task-specific
+    description: Skills activated for a specific task or lifecycle phase.
+    skills:
+      skill-creator:
+        ref: categories.core.skills.skill-creator
+        status: active
+      sdd-implement:
+        path: task/sdd-implement
+        status: active
+        source: internal
+
+resolution:
+  order:
+    - core
+    - hybrid
+    - profile
+    - task
+  deduplicate_by: skill_id
+  loadable_statuses:
+    - active
+  rules:
+    - Select a primary profile before resolving skills.
+    - Load only skills relevant to the selected task.
+    - Resolve references before loading a skill.
+    - Do not load planned or deprecated skills.
