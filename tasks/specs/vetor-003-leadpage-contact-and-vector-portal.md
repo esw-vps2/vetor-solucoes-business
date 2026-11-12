@@ -333,7 +333,7 @@ The approved delivery must include:
 - Email rendering or integration tests for the reusable VETOR layout.
 - The applicable repository validation commands:
   `npm run typecheck`, `npm run lint`, `npm run test`, `npm run test:e2e`,
-  `npm run sdd:validate`, `npm run build`, and `npm run format:check`.
+  `spec-driven-development`, `npm run build`, and `npm run format:check`.
 
 Planned acceptance-test mapping:
 
@@ -448,7 +448,7 @@ Portal Vector`.
 - Changed: no feature implementation or approval was performed by this
   specification audit. Existing worktree implementation changes are not
   treated as draft approval or acceptance evidence.
-- Tests: `npm run sdd:validate`, `npm run format:check`, and `npm run lint`
+- Tests: `spec-driven-development`, `npm run format:check`, and `npm run lint`
   are the applicable audit gates; feature acceptance remains pending human
   approval.
 

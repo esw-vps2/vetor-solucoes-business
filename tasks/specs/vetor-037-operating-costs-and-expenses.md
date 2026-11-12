@@ -916,7 +916,7 @@ Delivery choices recorded at approval:
   contract rules stay as they are.
 
 Commands after implementation: backend and frontend `lint`, `typecheck`,
-`test`, and `build`; backend `test:e2e`; `npm run sdd:validate`. Browser
+`test`, and `build`; backend `test:e2e`; `spec-driven-development`. Browser
 check of the list, create, cancel, category dialog, denial, and the mobile
 drawer, with the running portal session.
 
@@ -947,7 +947,7 @@ drawer, with the running portal session.
 
 - Changed: `backend/src/modules/expenses/`, `backend/src/database/migrations/1760000021000-add-operating-expenses.ts`, `backend/src/modules/portal/tenant-storage.service.ts`, `frontend/app/portal/financeiro/despesas/`, `frontend/components/expenses/`, `frontend/lib/expenses.ts`, `frontend/lib/api/client.ts`, `frontend/components/layout/portal-shell.tsx`, `docs/product.md`, `docs/design.md`, `docs/api.md`, `docs/database.md`, `openapi.yaml`, and the VETOR-036 Q-001 sentence.
 - Tests: `backend/src/modules/expenses/expenses.service.spec.ts`, `backend/src/modules/expenses/expense-dates.spec.ts`, `backend/src/modules/expenses/expense-series.spec.ts`, `backend/src/modules/expenses/operating-expense.entity.spec.ts`, `backend/test/expenses.e2e-spec.ts`, `frontend/components/expenses/expenses-home.spec.tsx`, `frontend/components/expenses/expense-form.spec.tsx`, `frontend/lib/expenses.spec.ts`, and `frontend/components/layout/portal-shell.spec.tsx`.
-- Commands: `npm run lint` passed with seven existing image warnings and no errors. `npm run typecheck` passed. `npm run test` passed (backend 300, frontend 322, SDD 10). `npm run test:e2e` passed (94). `npm run build` passed, including `/portal/financeiro/despesas`, `/nova`, `/[id]`, and `/[id]/editar`. `npm run sdd:validate` passed (37 specifications). `npm run format:check` was not run.
+- Commands: `npm run lint` passed with seven existing image warnings and no errors. `npm run typecheck` passed. `npm run test` passed (backend 300, frontend 322, SDD 10). `npm run test:e2e` passed (94). `npm run build` passed, including `/portal/financeiro/despesas`, `/nova`, `/[id]`, and `/[id]/editar`. `spec-driven-development` passed (37 specifications). `npm run format:check` was not run.
 - Limitations: the browser check used the signed-in `Administrador` at `http://app.vps2.com.br:3000`. The list, filters, empty and filtered-empty copy, create, detail (`Despesa salva.`), one-row cancel (`Despesa cancelada.`), category dialog, collapsed search for `custos`, Contratos at `/portal/financeiro`, and the 390px drawer were exercised. A one-off expense was saved and cancelled, so it remains in history and stays out of the summaries. An unused category created during the check was removed. The recurrence form hid competence, due date, and status; the series was not saved. Denial for `Usuario` and `AdministradorTenant` was not opened in that session, because signing out would require a new MFA login. Those profiles are covered by the shell and page tests, and the expense HTTP tests cover `401` and `403`.
 
 ## Validation evidence

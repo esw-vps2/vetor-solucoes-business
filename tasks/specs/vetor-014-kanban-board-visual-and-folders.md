@@ -705,7 +705,7 @@ Existing project security rules apply. Backend is the authority.
 - AC-012: `projects-home.spec.tsx` remains the VETOR-012 home treatment
 
 Commands after approved delivery: frontend and backend `typecheck`,
-`lint`, `test`, `build`; backend `test:e2e`; `npm run sdd:validate`.
+`lint`, `test`, `build`; backend `test:e2e`; `spec-driven-development`.
 
 ## Delivery
 
@@ -793,7 +793,7 @@ Do not add `archiver` to the root `package.json`.
   cover and assignee photos);
   `npm run test` passed (backend 147, frontend 123, SDD 10);
   `npm run test:e2e` passed (backend 55);
-  `npm run sdd:validate` passed (14 specifications);
+  `spec-driven-development` passed (14 specifications);
   `npm run build` passed (`/portal/projetos`, `/portal/projetos/[id]`).
 - Limitations: Human validation of AC-001–AC-012 has not started. A live
   board at `/portal/projetos/{id}` was exercised in the browser (six

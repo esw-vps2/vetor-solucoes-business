@@ -11,30 +11,19 @@ alwaysApply: true
   `tasks/specs/` with `status: approved`.
 - Do not implement a specification with `draft`, `in_review`, or `superseded`
   status.
-- Read `.agents/sdd/lifecycle.md`, `.agents/sdd/roles.md`,
-  `.agents/sdd/decision-authority.md`, and `.agents/sdd/agents.yml` before working
-  on a feature specification.
-- Run `npm run sdd:validate` whenever a specification changes.
+- Read the installed
+  [`spec-driven-development`](../../.agents/skills/profiles/architecture/spec-driven-development/SKILL.md)
+  skill before working on a feature specification.
 
 ## Responsibilities
 
-- Keep one assigned SDD role per deliverable.
-- When starting a dedicated chat or launching a subagent for an SDD role,
-  read [`.agents/sdd/agents.yml`](../../.agents/sdd/agents.yml) and use that role's
-  `model` and `effort`. Do not invent or substitute a model unless a human
-  overrides the assignment in the current prompt.
-- The `human_approver` role is never an LLM.
-- An intake adapter may create or update drafts but cannot approve them.
-- A specification author cannot approve its own specification.
-- A delivery agent implements only the approved scope.
-- A validation agent compares acceptance criteria to tests and recorded
-  evidence, but cannot approve its own work.
-- A named human is the only approver of a specification.
+- Keep one primary skill profile per deliverable.
+- The human is the only approver of a specification.
 - Ask the human about missing business and security decisions. Leave those
   items `TBD`.
-- Decide missing design and technical how as a senior engineer, record the
+- Decide missing design and technical details as a senior engineer, record the
   choice in the specification, and promote recurring visual decisions into
-  `docs/design.md`. See `.agents/sdd/decision-authority.md`.
+  `docs/design.md`.
 
 ## Contract hierarchy
 
@@ -58,5 +47,3 @@ alwaysApply: true
   `source_reference: chat-YYYY-MM-DD-<slug>`.
 - Do not create specifications from GitHub Issues, Kanban cards, webhooks,
   or other systems.
-- Do not add a channel-specific workflow, secret, credential, or integration
-  unless a human updates `.agents/sdd/configuration.md`.

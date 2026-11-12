@@ -17,17 +17,17 @@ and implementation scope ambiguous.
 
 ## Decision
 
-The template provides a channel-agnostic SDD core:
+The template uses the installed, channel-agnostic SDD skills:
 
 - versioned feature specifications under `tasks/specs/`;
-- a lifecycle that requires human approval before implementation;
-- defined role responsibilities and authority limits;
-- an adapter contract that normalizes project-specific intake;
-- local validation of specification structure and approval readiness.
+- `spec-driven-development` for clarification, specification, and approval;
+- `planning-and-task-breakdown` for implementation plans and tasks;
+- `sdd-implement` for delivery after approval;
+- verification and review skills for evidence and completion.
 
-Projects choose and configure their intake adapter in
-`.agents/sdd/configuration.md`. The template does not include active GitHub,
-Kanban, Cursor Cloud, webhook, or credential-based automations.
+The only supported intake channel is a human prompt in an agent conversation.
+The template does not include active GitHub, Kanban, Cursor Cloud, webhook, or
+credential-based automations.
 
 The global product, design, API, and data-model documents remain durable
 contracts. Specifications describe a feature's delta and promote approved,
@@ -35,10 +35,10 @@ cross-feature decisions into those contracts.
 
 ## Consequences
 
-- A project can adopt or change its request channel without changing the SDD
-  lifecycle.
+- A project can adopt or change its request channel without changing the
+  installed SDD skills.
 - Delivery agents have one approved, versioned source for feature scope and
   acceptance criteria.
 - Human approval remains a required control before product behavior changes.
-- Projects that need intake automation must implement it as a project-owned
-  adapter.
+- Structural specification validation is handled through the installed SDD
+  workflow and applicable repository quality checks.

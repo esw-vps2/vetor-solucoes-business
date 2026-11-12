@@ -252,7 +252,7 @@ tenant has MFA enabled.
 - AC-006: Migration test that existing rows, including `vetor`, store
   `false`. Tenant-create test that `POST /api/v1/tenants` stores `false`.
 
-Commands for delivery: `npm run sdd:validate`, backend `typecheck`, `lint`,
+Commands for delivery: `spec-driven-development`, backend `typecheck`, `lint`,
 `test`, and `test:e2e`, frontend `typecheck`, `lint`, `test`, and `build`.
 
 ## Delivery
@@ -286,7 +286,7 @@ Branch at implementation: `feature/admin-tenant-mfa`.
 ## Implementation evidence
 
 - Changed: `tenants.mfa_enabled` with migration `1760000017000-add-tenant-mfa-enabled`; `GET` and `PATCH /api/v1/admin/tenant-settings` for profile `Administrador`; `POST /api/v1/auth/login` follows the home tenant flag; portal route `/portal/administrador`, sidebar item, and login skip when `mfaRequired` is false. Updated `docs/product.md`, `docs/design.md`, `docs/api.md`, `docs/database.md`, `openapi.yaml`, and Swagger.
-- Tests: `npm run test --workspace backend` passed (41 files, 252 tests). `npm run test:e2e --workspace backend` passed (10 files, 84 tests). `npm run test --workspace frontend` passed (70 files, 261 tests). `npm run typecheck --workspace backend` passed. `npm run typecheck --workspace frontend` passed. `npm run lint --workspace backend` passed. `npm run lint --workspace frontend` passed with six existing `img` warnings and no errors. `npm run build --workspace backend` passed. `npm run build --workspace frontend` passed, including `/portal/administrador`. `npm run sdd:validate` passed (27 specifications). Live database: existing tenants `vetor` and `ME` stored `mfa_enabled` false after the migration. Browser on `http://localhost:3000/portal`: a home tenant with MFA off signed in without the code field; `/portal/administrador` showed heading `Administrador`, section `MFA`, and both tenant switches as `Desabilitado`; turning VETOR on and back off updated the label and wrote `tenant_mfa_changed` with only `previous` and `next`. Unauthenticated `GET /api/v1/admin/tenant-settings` returned 401.
+- Tests: `npm run test --workspace backend` passed (41 files, 252 tests). `npm run test:e2e --workspace backend` passed (10 files, 84 tests). `npm run test --workspace frontend` passed (70 files, 261 tests). `npm run typecheck --workspace backend` passed. `npm run typecheck --workspace frontend` passed. `npm run lint --workspace backend` passed. `npm run lint --workspace frontend` passed with six existing `img` warnings and no errors. `npm run build --workspace backend` passed. `npm run build --workspace frontend` passed, including `/portal/administrador`. `spec-driven-development` passed (27 specifications). Live database: existing tenants `vetor` and `ME` stored `mfa_enabled` false after the migration. Browser on `http://localhost:3000/portal`: a home tenant with MFA off signed in without the code field; `/portal/administrador` showed heading `Administrador`, section `MFA`, and both tenant switches as `Desabilitado`; turning VETOR on and back off updated the label and wrote `tenant_mfa_changed` with only `previous` and `next`. Unauthenticated `GET /api/v1/admin/tenant-settings` returned 401.
 
 ## Validation evidence
 

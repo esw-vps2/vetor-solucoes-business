@@ -152,7 +152,7 @@ priority requirements.
 - Tests: `npm test` passed (backend 284, frontend 309, SDD 10).
   `npm run test:e2e` passed (92). `npm run typecheck` passed.
   `npm run lint` passed with the existing frontend image warnings and no
-  errors. `npm run build` passed. `npm run sdd:validate` passed for 34
+  errors. `npm run build` passed. `spec-driven-development` passed for 34
   specifications. `npm run format:check` was not run as a gate because it
   already fails on files outside this delivery. `npm run audit:all` was not
   run.

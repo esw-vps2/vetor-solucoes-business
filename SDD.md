@@ -47,7 +47,9 @@ Do not create specifications from GitHub Issues, Kanban cards, webhooks, or othe
 | `validated` | A human confirmed the acceptance criteria | Complete |
 | `superseded` | A newer specification replaces this one | No |
 
-The detailed lifecycle, role authority, configuration, adapters, and role assignments are in `.agents/sdd/`.
+The installed `spec-driven-development` skill defines the lifecycle, approval
+gate, and role responsibilities. Repository-specific constraints are in
+`AGENTS.md`, `.cursor/rules/`, and the durable contracts under `docs/`.
 
 ## Process
 
@@ -59,14 +61,15 @@ The detailed lifecycle, role authority, configuration, adapters, and role assign
 6. Set `status: implemented` after delivery evidence is complete.
 7. Wait for human validation before setting `status: validated`.
 
-Run `npm run sdd:validate` whenever a specification changes. Do not treat `docs/product.md`, `docs/design.md`, `docs/api.md`, or `docs/database.md` as substitutes for a feature specification.
+Use the installed SDD, planning, implementation, and verification skills
+through their documented workflow. Do not treat `docs/product.md`,
+`docs/design.md`, `docs/api.md`, or `docs/database.md` as substitutes for a
+feature specification.
 
 ## Governance files
 
-- Lifecycle: `.agents/sdd/lifecycle.md`
-- Roles: `.agents/sdd/roles.md`
-- Decision authority: `.agents/sdd/decision-authority.md`
-- Adapters: `.agents/sdd/adapters.md`
-- Configuration: `.agents/sdd/configuration.md`
-- Role assignments: `.agents/sdd/agents.yml`
+- Process skill: `.agents/skills/profiles/architecture/spec-driven-development/SKILL.md`
+- Planning skill: `.agents/skills/profiles/architecture/planning-and-task-breakdown/SKILL.md`
+- Implementation skill: `.agents/skills/task/sdd-implement/SKILL.md`
+- Project rules: `.cursor/rules/spec-driven-development.mdc`
 - Template: `tasks/specs/_template.md`

@@ -297,7 +297,7 @@ Existing project security rules apply.
 
 Workspace commands after approved delivery: frontend and backend
 `typecheck`, `lint`, `test`, and `build` for the touched workspaces;
-`npm run sdd:validate`.
+`spec-driven-development`.
 
 ## Delivery
 

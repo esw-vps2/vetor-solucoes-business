@@ -554,7 +554,7 @@ components, under `frontend/components/kanban-ui/`.
 
 | Criterion | Check |
 | --- | --- |
-| AC-001 | This document's inventory matches page `5773:39069`, including the unread-instance table. `npm run sdd:validate` checks the specification shape |
+| AC-001 | This document's inventory matches page `5773:39069`, including the unread-instance table. `spec-driven-development` checks the specification shape |
 | AC-002 | The inventory marks every row Create, and a test file exists for each primitive C-01 through C-23 and for K-01 through K-03 |
 | AC-003 | Components import from `frontend/components/kanban-ui/` inside the existing Next.js app. No new `app/` route. The PWA manifest is unchanged |
 | AC-004 | Kit defaults render the Portuguese table. A board test still shows `Backlog`, `Pronto`, `Trabalhando`, `Revisão`, `Deploy`, and `Finalizado` |
@@ -618,7 +618,7 @@ npm run typecheck --workspace frontend
 npm run lint --workspace frontend
 npm run test --workspace frontend
 npm run build --workspace frontend
-npm run sdd:validate
+spec-driven-development
 ```
 
 Backend `test` and `test:e2e` are not required for this scope unless a
@@ -641,7 +641,7 @@ later delta adds HTTP.
 
 - Changed: `frontend/components/kanban-ui/` (primitives C-01–C-23, icons I-01–I-29, compositions K-01–K-03), `frontend/public/kanban-ui/` (six avatars and three covers), `frontend/components/projects/project-board.tsx` (kit lane and card chrome, `Compartilhar`, `?card=`), `frontend/test/setup.ts` (Plus Jakarta Sans test double), `docs/design.md` (Portal board row).
 - Tests: `frontend/components/kanban-ui/*.spec.tsx`, `frontend/components/projects/project-board.spec.tsx`, `frontend/app/portal/projetos/[id]/page.spec.tsx`.
-- Commands: after the project and launch compositions were aligned to the rendered file (`Convidar`, `Feito`, `Público para todos`, and the read card counts), `npm run lint --workspace frontend` passed with five `@next/next/no-img-element` warnings, `npm run typecheck --workspace frontend` passed, `npm run test --workspace frontend` passed (207 tests), and `npm run build --workspace frontend` passed, including `/portal/projetos/[id]`. `npm run sdd:validate` still fails on `vetor-017-portal-login-page.md`, which is outside this delivery. An unauthenticated open of `/portal/projetos/{id}?card={cardId}` stays on the existing login gate (`Portal Vector`) and does not show the card id. With a session, the board shows the six approved lanes and `Compartilhar`. The clipboard fallback shows `Link do card` with `{origin}/portal/projetos/{projectId}?card={cardId}`. Opening that URL opens the card modal. Closing it removes the `card` query. An id outside the board does not open a modal and is not shown. After `cover-steps.jpg` was added to `Linux version update`, lint passed with the same five image warnings, typecheck passed, `npm run test --workspace frontend` passed again (207 tests), and `npm run build --workspace frontend` passed.
+- Commands: after the project and launch compositions were aligned to the rendered file (`Convidar`, `Feito`, `Público para todos`, and the read card counts), `npm run lint --workspace frontend` passed with five `@next/next/no-img-element` warnings, `npm run typecheck --workspace frontend` passed, `npm run test --workspace frontend` passed (207 tests), and `npm run build --workspace frontend` passed, including `/portal/projetos/[id]`. `spec-driven-development` still fails on `vetor-017-portal-login-page.md`, which is outside this delivery. An unauthenticated open of `/portal/projetos/{id}?card={cardId}` stays on the existing login gate (`Portal Vector`) and does not show the card id. With a session, the board shows the six approved lanes and `Compartilhar`. The clipboard fallback shows `Link do card` with `{origin}/portal/projetos/{projectId}?card={cardId}`. Opening that URL opens the card modal. Closing it removes the `card` query. An id outside the board does not open a modal and is not shown. After `cover-steps.jpg` was added to `Linux version update`, lint passed with the same five image warnings, typecheck passed, `npm run test --workspace frontend` passed again (207 tests), and `npm run build --workspace frontend` passed.
 - Limitations: Figma MCP calls remain rate-limited. Header, sort-badge, lane-action, and card strings that were read from the rendered community file are mounted, including `Healthcare app wireframe flow`, `High Priority`, and `Low Priority`. A later read of the analytics frame also mounted `Blog Copywriting` counts `987` and `21,8k`, `High Priority` counts `108k` and `997`, `I don't know` counts `888` and `12`, `Maybe important` as `Talvez importante` with `9` and `487`, and `I guess` check `55`. The analytics board spec passed after that change. Sample card titles that were read stay in English. No attribution line is rendered. A later read of the project-board frame shows the completed lane header count `(7)` with five drawn cards; the other two titles are not in the frame, so they were not invented. The launch card `Linux version update` uses the file's portrait cover, stored as `frontend/public/kanban-ui/cover-steps.jpg`.
 
 ## Validation evidence

@@ -336,7 +336,7 @@ Delivery is complete for the approved scope. Human validation has not started.
 frontend` passed (60); `npm run test:e2e --workspace backend` passed (18);
   `npm run build` passed (`/`, `/portal`, `/portal/change-password`,
   `/manifest.webmanifest`); `npm run format:check` passed;
-  `npm run sdd:validate` passed.
+  `spec-driven-development` passed.
 - Runtime: authenticated `/portal` shows a centered sidebar lockup
   `/brand/symbol-vetor.png` plus HTML text `Vector Software Engineer`.
   Tenant identity is not in the sidebar. The header shows the section title

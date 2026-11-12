@@ -236,7 +236,7 @@ Approved delivery must include:
 - A regression check for the project-file PDF and image preview as the
   documented non-form viewport exception.
 - Frontend `typecheck`, `lint`, `test`, and `build`.
-- `npm run sdd:validate` after this specification changes and after the
+- `spec-driven-development` after this specification changes and after the
   approved delivery updates the specification.
 
 Planned acceptance-test mapping:
@@ -310,11 +310,11 @@ only this approved visual and responsive scope.
   `frontend/components/expenses/expense-detail.tsx`, and
   `frontend/components/ui/modal.spec.tsx`.
 - Existing contracts consulted: `docs/design.md`, `docs/product.md`,
-  `docs/conventions.md`, `.agents/sdd/README.md`,
-  `.agents/sdd/configuration.md`, `.agents/sdd/lifecycle.md`,
-  `.agents/sdd/decision-authority.md`, `.agents/sdd/roles.md`,
-  `.agents/sdd/adapters.md`, `tasks/specs/_template.md`,
-  `.agents/sdd/agents.yml`, and the frontend UI and testing guidance.
+  `docs/conventions.md`, `.agents/skills/profiles/architecture/spec-driven-development/SKILL.md`,
+  `.agents/skills/profiles/architecture/spec-driven-development/SKILL.md`, `.agents/skills/profiles/architecture/spec-driven-development/SKILL.md`,
+  `.agents/skills/profiles/architecture/spec-driven-development/SKILL.md`, `.agents/skills/profiles/architecture/spec-driven-development/SKILL.md`,
+  `.agents/skills/profiles/architecture/spec-driven-development/SKILL.md`, `tasks/specs/_template.md`,
+  `.agents/skills/profiles/architecture/spec-driven-development/SKILL.md`, and the frontend UI and testing guidance.
 - Technical decisions recorded here:
   - The shared `Modal` remains the single outer-shell implementation.
   - Form callers use the light `bg-white text-navy` treatment and default

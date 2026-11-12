@@ -9,9 +9,9 @@ description: Creates specs before coding. Use when starting a new project, featu
 
 Write a structured specification before writing any code. The spec is the shared source of truth between you and the human engineer — it defines what we're building, why, and how we'll know it's done. Code without a spec is guessing.
 
-For this repository, project-specific lifecycle, role, authority, intake, and
-approval rules live in `.agents/sdd/`. Feature specifications live in
-`tasks/specs/`.
+For this repository, project-specific constraints live in `AGENTS.md`,
+`.cursor/rules/`, and the durable contracts under `docs/`. Feature
+specifications live in `tasks/specs/`.
 
 ## When to Use
 

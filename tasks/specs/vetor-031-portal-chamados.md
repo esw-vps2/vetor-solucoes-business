@@ -608,9 +608,9 @@ review rather than being inferred in code.
   - `docs/design.md`
   - `docs/product.md`
   - `docs/conventions.md`
-  - `.agents/sdd/lifecycle.md`
-  - `.agents/sdd/roles.md`
-  - `.agents/sdd/decision-authority.md`
+  - `.agents/skills/profiles/architecture/spec-driven-development/SKILL.md`
+  - `.agents/skills/profiles/architecture/spec-driven-development/SKILL.md`
+  - `.agents/skills/profiles/architecture/spec-driven-development/SKILL.md`
   - `backend/src/modules/projects/projects.service.ts`
   - `backend/src/modules/portal/access-token.guard.ts`
   - `backend/src/modules/mail/mail.service.ts`
@@ -625,7 +625,7 @@ review rather than being inferred in code.
 - Tests: backend unit tests passed (270), backend e2e passed (88), frontend
   tests passed (291), backend and frontend typecheck passed, `npm run lint`
   passed with the existing frontend image warnings and no errors, backend
-  and frontend builds passed, and `npm run sdd:validate` passed for 31
+  and frontend builds passed, and `spec-driven-development` passed for 31
   specifications. `npm run format:check` still fails on pre-existing files
   outside this delivery. `npm run audit:all` still reports pre-existing
   high and critical advisories in existing dependencies. Authenticated

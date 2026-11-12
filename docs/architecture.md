@@ -38,8 +38,9 @@ A human prompt in an agent conversation is the only intake channel. Each
 prompt is normalized into a versioned specification under `tasks/specs/`.
 Delivery agents may implement only an approved specification. Humans decide
 business and security; agents decide design and technical how as senior
-engineers. See [`.agents/sdd/`](../.agents/sdd/) for the lifecycle,
-responsibilities, decision authority, and adapter contract.
+engineers. See the installed
+[`spec-driven-development`](../.agents/skills/profiles/architecture/spec-driven-development/SKILL.md)
+skill and the repository SDD rule for the lifecycle and responsibilities.
 
 ## Boundaries
 
@@ -58,7 +59,7 @@ responsibilities, decision authority, and adapter contract.
 ## References
 
 - Product scope: [`product.md`](./product.md)
-- SDD core: [`.agents/sdd/`](../.agents/sdd/)
+- SDD skill: [`spec-driven-development`](../.agents/skills/profiles/architecture/spec-driven-development/SKILL.md)
 - Feature specifications: [`tasks/specs/`](../tasks/specs/)
 - Visual decisions: [`design.md`](./design.md)
 - HTTP contract: [`api.md`](./api.md)

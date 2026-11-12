@@ -198,7 +198,7 @@ the superseded placement in VETOR-033.
 
 - Changed: `frontend/app/portal/vetor-agent/page.tsx`, `frontend/components/vetor-agent/vetor-agent-workspace.tsx`, `frontend/components/layout/portal-shell.tsx`, `docs/product.md`, `docs/design.md`, and `tasks/specs/vetor-033-vetor-agent-screen.md`.
 - Tests: `frontend/app/portal/vetor-agent/page.spec.tsx`, `frontend/components/vetor-agent/vetor-agent-workspace.spec.tsx`, and `frontend/components/layout/portal-shell.spec.tsx`.
-- Commands: frontend `lint` passed with seven existing image warnings and no errors, frontend `typecheck` passed, frontend `test` passed (310 tests), frontend `build` passed, and `npm run sdd:validate` passed. Backend `test` and `test:e2e` were not run because this delivery does not change the API or persistence.
+- Commands: frontend `lint` passed with seven existing image warnings and no errors, frontend `typecheck` passed, frontend `test` passed (310 tests), frontend `build` passed, and `spec-driven-development` passed. Backend `test` and `test:e2e` were not run because this delivery does not change the API or persistence.
 - Limitations: browser checks used the running app at `http://app.vps2.com.br:3000` with an existing `Administrador` session. From Suporte, `Vetor Agent` opened in the main column and the portal sidebar stayed visible. A prompt filled the composer, `Enviar` showed the preview status, and `Novo chat` cleared it. At 390px there was no horizontal overflow; `Abrir conversas` opened the list below the shell header and over the main column, and Escape closed it. A session without `vetorAgent` was not signed in during this check.
 
 ## Validation evidence

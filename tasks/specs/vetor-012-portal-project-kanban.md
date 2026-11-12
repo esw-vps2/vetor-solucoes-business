@@ -693,7 +693,7 @@ Planned coverage until approved delivery records evidence:
 
 Workspace commands after approved delivery: frontend and backend
 `typecheck`, `lint`, `test`, and `build` for touched workspaces; backend
-`test:e2e` when HTTP is crossed; `npm run sdd:validate`.
+`test:e2e` when HTTP is crossed; `spec-driven-development`.
 
 ## Delivery
 
@@ -782,7 +782,7 @@ Swagger, and `docs/database.md`.
   `npm run lint` passed;
   `npm run test` passed (backend 124, frontend 99, SDD 10);
   `npm run test:e2e` passed (backend 41);
-  `npm run sdd:validate` passed (12 specifications);
+  `spec-driven-development` passed (12 specifications);
   `npm run build` passed (`/portal/projetos`, `/portal/projetos/[id]`).
 - Limitations: Human validation of AC-001–AC-017 has not started. Power BI
   catalog/admin was not changed. `npm run docker:config` was not run.

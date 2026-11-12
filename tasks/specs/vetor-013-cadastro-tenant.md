@@ -388,7 +388,7 @@ tenant` is UX only.
 
 Workspace commands after approved delivery: frontend and backend
 `typecheck`, `lint`, `test`, and `build` for the touched workspaces;
-backend `test:e2e` when HTTP is crossed; `npm run sdd:validate`.
+backend `test:e2e` when HTTP is crossed; `spec-driven-development`.
 
 ## Delivery
 
@@ -424,7 +424,7 @@ Empresa` and `email`; submit creates the tenant.
   `createTenant`. `docs/database.md` tenants had no email and `name`
   was not unique.
 - Existing contracts consulted: `tasks/specs/_template.md`,
-  `.agents/sdd/lifecycle.md`, `tasks/specs/vetor-008-portal-layout-dashboard.md`,
+  `.agents/skills/profiles/architecture/spec-driven-development/SKILL.md`, `tasks/specs/vetor-008-portal-layout-dashboard.md`,
   `tasks/specs/vetor-009-user-photo-upload-sidebar-logo.md`,
   `tasks/specs/vetor-010-perfil-modal-user-permissions.md`,
   `tasks/specs/vetor-012-portal-project-kanban.md`, `docs/product.md`,
@@ -463,7 +463,7 @@ Empresa` and `email`; submit creates the tenant.
   `npm run lint` passed;
   `npm run test` passed (backend 134, frontend 110, SDD 10);
   `npm run test:e2e` passed (backend 52);
-  `npm run sdd:validate` passed (13 specifications);
+  `spec-driven-development` passed (13 specifications);
   `npm run build` passed.
 - Limitations: Human validation of AC-001–AC-017 has not started. Live
   browser walkthrough was not run in this delivery session. Migration

@@ -225,7 +225,7 @@ Deleting a project still cascades installment rows.
 
 Commands after approved delivery: frontend and backend `typecheck`,
 `lint`, `test`, and `build`; backend `test:e2e` for the finance spec;
-`npm run sdd:validate`.
+`spec-driven-development`.
 
 ## Delivery
 
@@ -262,7 +262,7 @@ Promote that label into `docs/design.md` on delivery.
 ## Implementation evidence
 
 - Changed: `frontend/components/finance/finance-home.tsx`, `frontend/components/finance/finance-home.spec.tsx`, `frontend/lib/api/client.ts`, `frontend/lib/finance.ts`, `backend/src/modules/projects/project-finance.service.ts`, `backend/src/modules/projects/project-finance.service.spec.ts`, `backend/src/modules/projects/dto/finance.dto.ts`, `backend/src/modules/projects/dto/finance-response.dto.ts`, `backend/src/modules/projects/entities/project-contract-installment.entity.ts`, `backend/src/modules/projects/finance-amounts.ts`, `backend/src/database/migrations/1760000026000-add-installment-due-on.ts`, `backend/test/finance.e2e-spec.ts`, `docs/product.md`, `docs/design.md`, `docs/api.md`, `docs/database.md`, `openapi.yaml`
-- Tests: backend `project-finance.service.spec.ts` passed inside `npm run test --workspace backend` (51 files, 357 tests). Frontend `finance-home.spec.tsx` passed inside `npm run test --workspace frontend` (87 files, 368 tests). `npm run test:e2e --workspace backend -- test/finance.e2e-spec.ts` passed (8 tests). Backend and frontend `typecheck` passed. Backend `lint` passed. Frontend `lint` passed with nine existing warnings and no errors. Backend and frontend `build` passed. `npm run sdd:validate` passed for 41 specifications. The logged-in Contratos screen was not opened in a browser in this session.
+- Tests: backend `project-finance.service.spec.ts` passed inside `npm run test --workspace backend` (51 files, 357 tests). Frontend `finance-home.spec.tsx` passed inside `npm run test --workspace frontend` (87 files, 368 tests). `npm run test:e2e --workspace backend -- test/finance.e2e-spec.ts` passed (8 tests). Backend and frontend `typecheck` passed. Backend `lint` passed. Frontend `lint` passed with nine existing warnings and no errors. Backend and frontend `build` passed. `spec-driven-development` passed for 41 specifications. The logged-in Contratos screen was not opened in a browser in this session.
 
 ## Validation evidence
 

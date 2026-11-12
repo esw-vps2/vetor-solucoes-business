@@ -14,14 +14,13 @@ the project contracts, rules, and skills that govern agent work.
 - `tasks/` — feature specifications, plans, and task lists
 - `.cursor/rules/` — persistent repository guidance
 - `.agents/skills/` — canonical repository skill registry, catalogs, and profiles
-- `.agents/sdd/` — project-specific SDD lifecycle and governance
 
 ## Before implementation
 
 1. Read this file.
 2. For product behavior, read the relevant approved specification in
-   [`tasks/specs/`](tasks/specs/), the applicable governance in
-   [`.agents/sdd/`](.agents/sdd/), and the installed
+   [`tasks/specs/`](tasks/specs/), the applicable SDD rules in
+   [`.cursor/rules/spec-driven-development.mdc`](.cursor/rules/spec-driven-development.mdc), and the installed
    [`spec-driven-development`](.agents/skills/profiles/architecture/spec-driven-development/SKILL.md)
    skill. Do not implement a `draft` or `in_review` specification.
 3. Read only the global contract that applies to the work:
@@ -100,8 +99,10 @@ For files in `frontend/`, use:
 
 ## Skills
 
-The canonical skill registry is [`.agents/skills/`](.agents/skills/). Before
-selecting skills, read [`skills-catalog.yaml`](.agents/skills/skills-catalog.yaml),
+The canonical skill registry is [`.agents/skills/`](.agents/skills/), with
+external CLI-installed skills locked in [`skills-lock.json`](skills-lock.json).
+Before selecting skills, read
+[`skills-catalog.yaml`](.agents/skills/skills-catalog.yaml),
 [`agent-profiles.yaml`](.agents/skills/agent-profiles.yaml), and
 [`workflow.yaml`](.agents/skills/workflow.yaml). Skills are loaded on demand
 after the primary profile is selected.
@@ -177,7 +178,6 @@ npm run typecheck
 npm run lint
 npm run test
 npm run test:e2e
-npm run sdd:validate
 npm run build
 npm run format:check
 npm run audit:all

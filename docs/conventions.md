@@ -9,12 +9,6 @@ API, and data-model decisions belong in their matching contracts under
 
 ```text
 .agents/
-├── sdd/
-│   ├── adapters.md
-│   ├── agents.yml
-│   ├── configuration.md
-│   ├── lifecycle.md
-│   └── roles.md
 └── skills/
 tasks/
 └── specs/
@@ -26,8 +20,9 @@ tasks/
 - Use lowercase kebab-case file names, prefixed with the specification id,
   such as `vetor-001-create-profile.md`.
 - Do not edit a specification outside its lifecycle state.
-- Intake is a human prompt only. Do not add GitHub, Kanban, webhook, or other
-  input-platform adapters unless `.agents/sdd/configuration.md` is updated.
+- Intake begins with a human prompt. Use the installed
+  `spec-driven-development` skill and the repository SDD rule for the
+  specification lifecycle.
 
 ## Canonical folder structure
 
@@ -83,7 +78,7 @@ The root owns shared configuration:
 - `.prettierrc`, `.editorconfig`, and `.nvmrc`
 - `.github/workflows/` for repository automation
 - `.cursor/rules/` for persistent agent guidance
-- `.agents/` for shared skills and project SDD governance
+- `.agents/skills/` for the shared skill registry
 
 ## Environment variables
 

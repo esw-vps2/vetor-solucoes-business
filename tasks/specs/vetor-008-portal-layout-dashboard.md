@@ -398,7 +398,7 @@ Existing project security rules apply.
 
 Workspace commands after approved delivery: frontend and backend
 `typecheck`, `lint`, `test`, and `build` for the touched workspaces;
-`npm run sdd:validate`.
+`spec-driven-development`.
 
 ## Delivery
 
@@ -471,7 +471,7 @@ Usuário` form on `/portal`; tenant list of every database tenant; user
   `npm run lint` passed; `npm run test` passed (backend 44, frontend 52,
   SDD 10); `npm run test:e2e` passed (backend 12); `npm run build` passed
   (`/`, `/portal`, `/portal/change-password`, `/manifest.webmanifest`);
-  `npm run docker:config` passed; `npm run sdd:validate` passed.
+  `npm run docker:config` passed; `spec-driven-development` passed.
 - Runtime: PostgreSQL bootstrap user is `Admin` / `Vetor` / `40` / `M` /
   `/brand/symbol-vetor.png` on tenant `vetor`. Tenant folder
   `infrastructure/repository/files/270fef84-bd39-4f89-b1f4-efcdd76af51f`

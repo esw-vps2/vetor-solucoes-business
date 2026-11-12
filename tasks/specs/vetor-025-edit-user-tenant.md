@@ -178,7 +178,7 @@ Swagger, `openapi.yaml`, and `docs/api.md`. No schema migration.
 ## Implementation evidence
 
 - Changed: `PortalEditUserForm` shows `Tenant` only for `Administrador` and sends `tenantId` on save. `UsersService.update` accepts `tenantId` from `Administrador`, rejects it for other profiles, moves an uploaded photo pointer, and keeps the previous tenant when save fails. Contracts: `docs/api.md`, `docs/database.md`, `docs/design.md`, `openapi.yaml`, and `UpdateUserDto`.
-- Tests: `backend` `users.service.spec.ts` 28 passed. `frontend` `portal-edit-user-form.spec.tsx` 6 passed. `backend` `test/swagger.e2e-spec.ts` 2 passed. `npm run lint --workspace backend` passed. `npm run typecheck --workspace frontend` passed. `npm run lint --workspace frontend` passed with existing image warnings and no errors. `npm run typecheck --workspace backend` failed on existing errors in `rate-limit.guard.spec.ts`, `session-tenant.e2e-spec.ts`, and `tenants.e2e-spec.ts`, outside this change. `npm run sdd:validate` passed.
+- Tests: `backend` `users.service.spec.ts` 28 passed. `frontend` `portal-edit-user-form.spec.tsx` 6 passed. `backend` `test/swagger.e2e-spec.ts` 2 passed. `npm run lint --workspace backend` passed. `npm run typecheck --workspace frontend` passed. `npm run lint --workspace frontend` passed with existing image warnings and no errors. `npm run typecheck --workspace backend` failed on existing errors in `rate-limit.guard.spec.ts`, `session-tenant.e2e-spec.ts`, and `tenants.e2e-spec.ts`, outside this change. `spec-driven-development` passed.
 - Limitation: an existing access token can still name the previous tenant until refresh or expiry. Sessions are not revoked, as specified.
 
 ## Validation evidence

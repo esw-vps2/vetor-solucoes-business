@@ -258,7 +258,7 @@ rows. One new TypeORM migration. `synchronize` stays false.
 
 Commands after approved delivery: frontend and backend `typecheck`,
 `lint`, `test`, and `build`; backend `test:e2e` for the finance spec;
-`npm run sdd:validate`.
+`spec-driven-development`.
 
 ## Delivery
 

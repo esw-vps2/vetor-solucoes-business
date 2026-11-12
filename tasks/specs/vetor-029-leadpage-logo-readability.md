@@ -124,7 +124,7 @@ Approved delivery must include:
   `npm run lint --workspace frontend`,
   `npm run test --workspace frontend`, and
   `npm run build --workspace frontend`.
-- `npm run sdd:validate` and `npm run format:check`.
+- `spec-driven-development` and `npm run format:check`.
 
 Planned acceptance-test mapping:
 
@@ -161,8 +161,8 @@ database, environment, or security-contract files should change.
   `h-11 w-auto brightness-0 invert lg:h-12`, and the supplied DOM position
   and size.
 - Existing contracts consulted: `docs/design.md`, `docs/product.md`,
-  `docs/conventions.md`, `.agents/sdd/lifecycle.md`,
-  `.agents/sdd/roles.md`, and `.agents/sdd/decision-authority.md`.
+  `docs/conventions.md`, `.agents/skills/profiles/architecture/spec-driven-development/SKILL.md`,
+  `.agents/skills/profiles/architecture/spec-driven-development/SKILL.md`, and `.agents/skills/profiles/architecture/spec-driven-development/SKILL.md`.
 - Approval signal: the human-supplied `/goal
 @tasks/specs/vetor-029-leadpage-logo-readability.md` command on
   2026-10-24.

@@ -228,7 +228,7 @@ The approved delivery must include:
 - Process coverage: HTTP-contract rules require Swagger, `openapi.yaml`, and
   `docs/api.md` updates with every new endpoint.
 - The applicable repository validation commands:
-  `npm run typecheck`, `npm run lint`, `npm run test`, `npm run sdd:validate`,
+  `npm run typecheck`, `npm run lint`, `npm run test`, `spec-driven-development`,
   `npm run build`, and `npm run format:check`.
 
 Planned acceptance-test mapping:
@@ -300,7 +300,7 @@ HTTP-contract rules.
   `backend/test/openapi-contract.spec.ts`.
 - Commands: `npm run typecheck` passed; `npm run lint` passed; `npm run test`
   passed (backend 24, frontend 36, SDD 10); `npm run test:e2e` passed
-  (backend 6); `npm run sdd:validate` passed; `npm run build` passed;
+  (backend 6); `spec-driven-development` passed; `npm run build` passed;
   `npm run format:check` passed.
 - Limitations: Swagger UI is reachable only after a portal login that sets
   the access cookie. Independent validation of the acceptance criteria is

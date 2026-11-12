@@ -7,12 +7,12 @@
 `tasks/specs/` SDD layout without changing Vetor product behavior.
 
 **Architecture:** Keep the existing runtime workspaces and service boundaries.
-Use `.agents/skills/` for shared agent skills, `.agents/sdd/` for project SDD
-governance, `tasks/specs/` for feature specifications, and `docs/` for durable
-product and technical contracts.
+Use `.agents/skills/` for the complete SDD workflow, `tasks/specs/` for
+feature specifications, and `docs/` for durable product and technical
+contracts.
 
-**Tech Stack:** Markdown and YAML governance files, Node.js ESM SDD automation,
-npm workspaces, NestJS, Next.js, and Docker Compose.
+**Tech Stack:** Markdown and YAML governance files, npm workspaces, NestJS,
+Next.js, and Docker Compose.
 
 **Spec:** The approved reorganization design in the active agent plan.
 
@@ -31,8 +31,7 @@ npm workspaces, NestJS, Next.js, and Docker Compose.
 
 - Every active skill catalog entry resolves to a physical `SKILL.md`.
 - Every SDD and contract link resolves to the new canonical path.
-- The validator reads `tasks/specs/`, ignores `_template.md`, and preserves the
-  existing lifecycle and evidence rules.
+- The installed SDD skills govern specification lifecycle and evidence.
 - No XATI or workspace-local agent paths remain outside human-only README files.
 - The migration does not modify application source or product contracts beyond
   path and governance references.
@@ -42,7 +41,7 @@ npm workspaces, NestJS, Next.js, and Docker Compose.
 ### Task 1: Migrate SDD artifacts
 
 - [x] Move the Vetor specifications and template to `tasks/specs/`.
-- [x] Move project SDD governance to `.agents/sdd/`.
+- [x] Use the installed SDD skills as the project workflow.
 - [x] Remove unrelated XATI specifications from `tasks/specs/`.
 - [x] Preserve specification content, statuses, IDs, acceptance criteria, and
   evidence.
@@ -57,22 +56,20 @@ npm workspaces, NestJS, Next.js, and Docker Compose.
 
 ### Task 3: Align contracts and repository guidance
 
-- [x] Update `AGENTS.md`, Cursor rules, ADRs, contracts, SDD command, and SDD
-  guide.
+- [x] Update `AGENTS.md`, Cursor rules, ADRs, contracts, and the SDD guide.
 - [x] Update all feature-specification traceability links.
 - [ ] Check relative links from `.agents/`, `.cursor/`, `docs/`, and `tasks/`.
 
-### Task 4: Restore SDD automation
+### Task 4: Use installed SDD skills
 
-- [x] Restore the validator and its tests.
-- [x] Change the canonical validation directory to `tasks/specs/`.
-- [x] Add a regression test for repository validation.
-- [x] Run focused SDD tests and validation.
+- [x] Use `spec-driven-development` for specification and approval.
+- [x] Use `planning-and-task-breakdown` for plans and task lists.
+- [x] Use `sdd-implement` for approved delivery.
+- [x] Use `verification-before-completion` for evidence.
 
 ### Task 5: Remove stale structure
 
-- [ ] Remove obsolete nested agent trees and skill locks from the tracked
-  layout.
+- [x] Remove project-specific SDD automation and command wrappers.
 - [ ] Confirm `.agents/` is versioned and remains excluded from Docker contexts.
 - [ ] Sweep for stale paths and unrelated XATI content.
 
@@ -82,11 +79,13 @@ npm workspaces, NestJS, Next.js, and Docker Compose.
 - [ ] Inspect the final diff for accidental application or product changes.
 - [ ] Record command outcomes and unresolved limitations.
 
-## Verification Commands
+## Verification Workflow
+
+Use the installed `spec-driven-development`,
+`verification-before-completion`, and relevant profile skills. Run the
+applicable repository commands:
 
 ```bash
-npm run sdd:validate
-npm run test:sdd
 npm run format:check
 npm run test
 npm run lint

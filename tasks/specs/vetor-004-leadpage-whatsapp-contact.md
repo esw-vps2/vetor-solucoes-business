@@ -144,7 +144,7 @@ The approved delivery must include:
 - Tests that an empty environment value hides the widget.
 - Tests for accessible name and keyboard activation.
 - The applicable repository validation commands:
-  `npm run typecheck`, `npm run lint`, `npm run test`, `npm run sdd:validate`,
+  `npm run typecheck`, `npm run lint`, `npm run test`, `spec-driven-development`,
   `npm run build`, and `npm run format:check`.
 
 Planned acceptance-test mapping:
@@ -199,7 +199,7 @@ was required.
   `frontend/lib/whatsapp.spec.ts`, `frontend/app/page.spec.tsx`, and
   `frontend/app/portal/page.spec.tsx`.
 - Commands: `npm run typecheck` passed; `npm run lint` passed; `npm run test`
-  passed (backend 11, frontend 36, SDD 10); `npm run sdd:validate` passed;
+  passed (backend 11, frontend 36, SDD 10); `spec-driven-development` passed;
   `npm run build` passed; `npm run format:check` passed.
 - Limitations: the widget is hidden until `NEXT_PUBLIC_WHATSAPP_NUMBER` is set
   in the running frontend environment. Production images need the matching

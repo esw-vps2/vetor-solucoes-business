@@ -6,7 +6,7 @@ references:
   skills_catalog: .agents/skills/skills-catalog.yaml
   agent_profiles: .agents/skills/agent-profiles.yaml
   project_guidance: AGENTS.md
-  sdd_governance: .agents/sdd/configuration.md
+  specification_rules: .cursor/rules/spec-driven-development.mdc
   specification_skill: .agents/skills/profiles/architecture/spec-driven-development/SKILL.md
   planning_skill: .agents/skills/profiles/architecture/planning-and-task-breakdown/SKILL.md
   implementation_skill: .agents/skills/task/sdd-implement/SKILL.md

@@ -455,7 +455,7 @@ write path. `getBoard` remains the read path, with the tool mapping the
 narrow field list above.
 
 Commands after implementation: backend `typecheck`, `lint`, `test`,
-`test:e2e`, and `build`; root `sdd:validate`. Root `format:check` and
+`test:e2e`, and `build`; root `spec-driven-development`. Root `format:check` and
 `audit:all` when those scripts still exist. No frontend suite is required
 unless a transcript assertion is added.
 
@@ -485,7 +485,7 @@ unless a transcript assertion is added.
 
 - Changed: `backend/src/modules/ai-agent/project-card-match.ts`, `backend/src/modules/ai-agent/project-card-tools.service.ts`, `backend/src/modules/ai-agent/run-processor.ts`, `backend/src/modules/ai-agent/ai-worker.module.ts`, `backend/src/modules/projects/projects.service.ts`, `backend/src/modules/projects/dto/card.dto.ts`, `backend/src/modules/projects/dto/project-response.dto.ts`, `backend/src/modules/projects/entities/card.entity.ts`, `backend/src/database/migrations/1760000025000-add-agent-project-card-tools.ts`, `frontend/components/projects/project-board.tsx`, `docs/api.md`, `openapi.yaml`, `docs/database.md`, and `docs/product.md`. The worker resolves the project name and runs list, create, and update before the model can paraphrase the required sentences.
 - Tests: `npm run test --workspace backend` passed on 2026-11-04 with 51 files and 354 tests. `npm run test:e2e --workspace backend` passed with 13 files and 99 tests. `npm run test --workspace frontend -- components/projects/project-board.spec.tsx` passed with 28 tests.
-- Checks: `npm run typecheck --workspace backend` passed. `npm run lint --workspace backend` passed. `npm run build --workspace backend` passed. `npm run typecheck --workspace frontend` passed. `npm run sdd:validate` passed for 40 specifications. `npm run format:check` failed on pre-existing files across the repository; the new agent tool files were formatted with Prettier. `npm run audit:all` failed with existing high and critical advisories in transitive dependencies. This change adds no package.
+- Checks: `npm run typecheck --workspace backend` passed. `npm run lint --workspace backend` passed. `npm run build --workspace backend` passed. `npm run typecheck --workspace frontend` passed. `spec-driven-development` passed for 40 specifications. `npm run format:check` failed on pre-existing files across the repository; the new agent tool files were formatted with Prettier. `npm run audit:all` failed with existing high and critical advisories in transitive dependencies. This change adds no package.
 
 ## Validation evidence
 

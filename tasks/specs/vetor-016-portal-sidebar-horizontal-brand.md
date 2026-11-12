@@ -147,7 +147,7 @@ Commands after approved delivery:
 - `npm run lint --workspace frontend`
 - `npm run test --workspace frontend`
 - `npm run build --workspace frontend`
-- `npm run sdd:validate`
+- `spec-driven-development`
 
 No backend unit or e2e test. Product behavior stays unchanged until a named
 human sets `status: approved`.

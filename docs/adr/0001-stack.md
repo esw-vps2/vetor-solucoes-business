@@ -19,7 +19,6 @@ Use npm workspaces with:
 - `infrastructure/` for Docker Compose, PostgreSQL, and Dockerfiles
 - `.cursor/rules/` for repository guidance
 - `.agents/skills/` for shared and layer-specific skills
-- `.agents/sdd/` for project-specific SDD governance
 - `docs/` for approved product, design, API, data-model, and architectural
   decisions
 

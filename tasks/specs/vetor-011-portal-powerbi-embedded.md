@@ -544,7 +544,7 @@ non-`Administrador`.
 - AC-012: listed global contracts updated in the approved delivery
 
 Quality gate when implemented later, from the repo root, for touched
-workspaces: `typecheck`, `lint`, `test`, `test:e2e`, `sdd:validate`,
+workspaces: `typecheck`, `lint`, `test`, `test:e2e`, `spec-driven-development`,
 `build`.
 
 ## Delivery
@@ -662,7 +662,7 @@ Do not rewrite Python except that Compose/env wiring. `allowEdit` remains
   `npm run test --workspace backend` passed (83);
   `npm run test --workspace frontend` passed (76);
   `npm run test:e2e --workspace backend` passed (27);
-  `npm run sdd:validate` passed (11 specifications);
+  `spec-driven-development` passed (11 specifications);
   `npm run build` passed (`/`, `/portal`, `/portal/change-password`,
   `/portal/powerbi`, `/portal/relatorios`, `/manifest.webmanifest`);
   `npm run docker:config` passed.

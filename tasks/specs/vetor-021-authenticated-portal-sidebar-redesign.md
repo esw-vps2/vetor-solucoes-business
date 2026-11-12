@@ -326,7 +326,7 @@ update the portal section and component inventory in `docs/design.md` in the
 same change.
 
 The delivery must execute the applicable frontend checks and
-`npm run sdd:validate`. It must record command results and changed files in
+`spec-driven-development`. It must record command results and changed files in
 the implementation evidence section.
 
 ## Traceability
@@ -388,7 +388,7 @@ authorization, session, logout, and data-exposure policies remain in force.
   not clean because of three pre-existing errors in
   `src/common/security/rate-limit.guard.spec.ts` and
   `test/session-tenant.e2e-spec.ts`; no cargo-related type errors were
-  reported. `npm run sdd:validate` passed with 21 specifications and
+  reported. `spec-driven-development` passed with 21 specifications and
   `git diff --check` passed.
 
 ## Validation evidence

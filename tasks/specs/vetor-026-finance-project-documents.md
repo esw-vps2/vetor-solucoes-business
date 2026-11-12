@@ -254,7 +254,7 @@ before the existing database cascade removes the rows.
   invalid file input, and project deletion.
 - Contract tests update Swagger and OpenAPI assertions.
 - Run frontend and backend `typecheck`, `lint`, `test`, and `build`, backend
-  `test:e2e`, and `npm run sdd:validate`.
+  `test:e2e`, and `spec-driven-development`.
 
 Coverage mapping:
 

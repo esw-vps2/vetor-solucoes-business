@@ -179,7 +179,7 @@ origin.
   `Sair` in `frontend/components/layout/authenticated-portal.tsx` opens
   `/login`. `infrastructure/.env.backend.example` includes `https://vps2.com.br`.
   Updated `docs/product.md`, `docs/design.md`, and `docs/api.md`.
-- Tests: `npm run test --workspace frontend` passed on 2026-10-28 with 83 files and 337 tests. `npm run test --workspace frontend -- app/portal/layout.spec.tsx` later passed with 7 tests, including logout to `/login`. `npm run test --workspace backend -- src/common/security/cors-origins.spec.ts` passed with 3 tests. `npm run sdd:validate` passed for 39 specifications.
+- Tests: `npm run test --workspace frontend` passed on 2026-10-28 with 83 files and 337 tests. `npm run test --workspace frontend -- app/portal/layout.spec.tsx` later passed with 7 tests, including logout to `/login`. `npm run test --workspace backend -- src/common/security/cors-origins.spec.ts` passed with 3 tests. `spec-driven-development` passed for 39 specifications.
 - Checks: `npm run typecheck --workspace frontend` passed after `next typegen`. `npm run lint --workspace frontend` passed with seven existing `@next/next/no-img-element` warnings and no errors. `npm run build --workspace frontend` passed and lists `/login`. `npm run test:e2e` was not run; this change does not alter an HTTP endpoint. The full backend suite was not run; only the CORS example assertion changed.
 - Browser: `http://127.0.0.1:3000/login` showed `Acesse sua conta`, `E-mail corporativo`, and `Senha`, and accepted an e-mail value. `http://127.0.0.1:3000/` stayed the leadpage. `http://localhost:3000/portal` without a session continued to `http://localhost:3000/login`. A request with `Host: vps2.com.br:3000` to `/login` returned the same credential page.
 

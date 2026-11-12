@@ -1,39 +1,32 @@
 # Reorganization Task List
 
 - [x] Move Vetor specifications to `tasks/specs/`.
-- [x] Move SDD governance to `.agents/sdd/`.
+- [x] Adopt the installed SDD skills as the project workflow.
 - [x] Consolidate workspace guidance into `.agents/skills/`.
 - [x] Align repository rules, contracts, ADRs, and SDD entrypoints.
-- [x] Restore and adapt SDD validation automation.
+- [x] Remove project-specific SDD automation and command wrappers.
 - [x] Confirm catalog and workflow references.
 - [x] Remove stale nested agent paths and unrelated XATI content.
 - [x] Run the complete verification command set.
 - [x] Inspect the final diff and record evidence.
 
-## Checkpoint: Governance migration
+## Checkpoint: Skills workflow
 
-- [x] `npm run sdd:validate`
-- [x] `node --test automation/sdd/test/validate-specs.test.mjs`
-- [ ] `npm run format:check`
-
-## Checkpoint: Repository verification
-
-- [x] `npm run test`
-- [x] `npm run lint`
-- [x] `npm run typecheck`
-- [x] `npm run build`
-- [ ] `npm run audit:all`
+- [x] `spec-driven-development`
+- [x] `planning-and-task-breakdown`
+- [x] `sdd-implement`
+- [x] `verification-before-completion`
 
 ## Evidence
 
-- `npm run sdd:validate`: passed; 41 specifications validated.
-- `npm run test:sdd`: passed; 11 tests passed.
-- `npm run format:check`: failed; 162 files require formatting, including
-  untouched runtime files. No unrelated formatter-only changes were applied.
-- `npm run test`: passed; backend, frontend, worker, and SDD tests passed.
+- The project SDD workflow is provided by the installed skills and
+  `tasks/specs/`.
+- Project-specific SDD automation and command wrappers were removed.
+- `npm run test`: passed for backend, frontend, and worker workspaces.
 - `npm run lint`: passed with 9 warnings and no errors.
 - `npm run typecheck`: passed for all workspaces.
 - `npm run build`: passed for all workspaces.
-- `npm run audit:all`: failed; npm reported 27 dependency vulnerabilities.
-- `git diff --check`: passed.
-- Markdown link check: passed; no broken local links found.
+- `npm run format:check`: failed on 162 formatting issues across the
+  repository, including untouched runtime files.
+- `npm run audit:all`: failed with 27 dependency vulnerabilities.
+- Local Markdown links and `git diff --check`: passed.

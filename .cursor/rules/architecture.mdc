@@ -44,4 +44,4 @@ Browser -> Next.js -> NestJS API -> Persistence when required
 ## Agent guidance
 
 - Shared skills: `.agents/skills/`
-- Project SDD governance: `.agents/sdd/`
+- SDD process: `.agents/skills/profiles/architecture/spec-driven-development/SKILL.md`

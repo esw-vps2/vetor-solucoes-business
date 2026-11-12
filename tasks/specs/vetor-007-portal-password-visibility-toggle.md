@@ -117,7 +117,7 @@ Frontend workspace only. Implementation starts only after a named human sets
   `frontend/components/forms/portal-access-modal.spec.tsx`. Commands:
   `npm run typecheck --workspace frontend` passed; `npm run lint --workspace frontend`
   passed; `npm run test --workspace frontend` passed (45 tests);
-  `npm run build --workspace frontend` passed; `npm run sdd:validate` passed.
+  `npm run build --workspace frontend` passed; `spec-driven-development` passed.
 
 ## Validation evidence
 

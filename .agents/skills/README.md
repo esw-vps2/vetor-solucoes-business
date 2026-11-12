@@ -17,6 +17,10 @@ loaded on demand.
 └── task/
 ```
 
+The repository-root `skills-lock.json` records skills installed from external
+repositories through the skills CLI. The catalog also includes maintained
+internal skills and aliases that do not require a CLI lock entry.
+
 Every skill has its own directory and a valid `SKILL.md` file:
 
 ```text
@@ -36,6 +40,7 @@ Read these files before selecting or installing a skill:
 
 | File | Responsibility |
 | --- | --- |
+| `skills-lock.json` | Locks externally installed skills and their source hashes. |
 | `agent-profiles.yaml` | Maps profiles to agents and authorized skills. |
 | `skills-catalog.yaml` | Defines skill identifiers, paths, status, origins, and profiles. |
 | `workflow.yaml` | Defines profile selection, skill resolution, delivery stages, and validation. |

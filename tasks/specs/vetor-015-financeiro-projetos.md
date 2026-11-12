@@ -595,7 +595,7 @@ controls:
   plaintext.
 
 Commands after approved delivery: frontend and backend `typecheck`,
-`lint`, `test`, `build`; backend `test:e2e`; `npm run sdd:validate`.
+`lint`, `test`, `build`; backend `test:e2e`; `spec-driven-development`.
 
 ## Delivery
 
@@ -653,14 +653,14 @@ grant.
   `docs/product.md`, `docs/design.md`, `docs/api.md`, `docs/database.md`,
   `openapi.yaml`
 - Tests: `npm run typecheck`, `npm run lint`, `npm run test`,
-  `npm run test:e2e`, `npm run build`, and `npm run sdd:validate` passed
+  `npm run test:e2e`, `npm run build`, and `spec-driven-development` passed
   on 2026-09-21. Backend unit tests cover the six formulas, the 501st
   entry, other-tenant `404`, PDF magic, pointer overwrite, and unlink on
   project and workspace delete. Frontend tests cover the nav, forbidden
   copy, zero contract, and the finance modal (contract value, paid amount,
   and cost value). The later UI follow-up was checked with frontend
   typecheck, lint, `finance-home.spec.tsx`, `npm run build --workspace
-  frontend`, and `npm run sdd:validate`. Backend e2e was not re-run for
+  frontend`, and `spec-driven-development`. Backend e2e was not re-run for
   that follow-up because the HTTP contract did not change.
   `backend/test/finance.e2e-spec.ts` covers the finance HTTP routes,
   `400` validation, `401`, and `403`.
