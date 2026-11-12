@@ -317,7 +317,7 @@ This inventory covers every physical `SKILL.md` currently installed under
 - **Purpose:** Converts a specification or clear requirements into ordered,
   small, verifiable tasks with dependencies and acceptance criteria.
 - **Use it:** Apply after requirements are clear and before implementation.
-  Store the plan in `tasks/plan.md` and the task list in `tasks/todo.md`.
+  Store the plan in `tasks/plan/` and the task list in `tasks/todo/`.
 - **Path:** `profiles/architecture/planning-and-task-breakdown`
 
 ### Task skills
@@ -378,7 +378,7 @@ Use the installed skills as a sequence:
 1. `profiles/architecture/spec-driven-development` clarifies requirements,
    writes the specification, and stops for human approval.
 2. `profiles/architecture/planning-and-task-breakdown` creates
-   `tasks/plan.md` and `tasks/todo.md`.
+   `tasks/plan/plan.md` and `tasks/todo/todo.md`.
 3. `task/sdd-implement` delivers approved tasks.
 4. Core verification, testing, security, documentation, and review skills
    provide task-specific checks.
@@ -389,8 +389,10 @@ Store persistent work artifacts in:
 tasks/
 ├── specs/
 │   └── <feature-slug>.md
-├── plan.md
-└── todo.md
+├── plan/
+│   └── plan.md
+└── todo/
+    └── todo.md
 ```
 
 Do not create a second specification, planning, or workflow registry in

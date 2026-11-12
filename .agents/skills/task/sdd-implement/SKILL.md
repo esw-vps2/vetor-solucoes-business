@@ -8,7 +8,7 @@ description: Deliver an approved Vetor specification through its approved plan a
 ## Required inputs
 
 - A human-approved specification stored in `tasks/specs/`.
-- A human-approved implementation plan and task breakdown.
+- A human-approved implementation plan in `tasks/plan/` and task breakdown in `tasks/todo/`.
 - The relevant global contracts, workspace rules, and assigned delivery role.
 - A clear validation command set for the affected workspaces.
 

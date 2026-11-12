@@ -42,8 +42,9 @@ selection:
       `.cursor/rules/` as higher authority than community skills.
     - Use the installed specification, planning, and implementation skills as
       the canonical delivery workflow.
-    - Store specifications in `tasks/specs/`, plans in `tasks/plan.md`, and
-      task lists in `tasks/todo.md`.
+    - Store specifications in `tasks/specs/`, plans in `tasks/plan/`, and
+      task lists in `tasks/todo/`. Do not save those files directly in
+      `tasks/`.
 
 stages:
   - id: intake

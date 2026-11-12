@@ -9,6 +9,8 @@ alwaysApply: true
 
 - New or changed product behavior requires a related specification in
   `tasks/specs/` with `status: approved`.
+- Save each `tasks/` artifact in the folder for its kind: specifications in
+  `tasks/specs/`, plans in `tasks/plan/`, and task lists in `tasks/todo/`.
 - Do not implement a specification with `draft`, `in_review`, or `superseded`
   status.
 - Read the installed

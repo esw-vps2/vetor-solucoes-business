@@ -13,6 +13,27 @@ For this repository, project-specific constraints live in `AGENTS.md`,
 `.cursor/rules/`, and the durable contracts under `docs/`. Feature
 specifications live in `tasks/specs/`.
 
+## Artifact layout
+
+Save every file under `tasks/` in the folder named for its artifact kind.
+Do not write `plan.md`, `todo.md`, or any other artifact directly in `tasks/`.
+
+| Kind | Folder | Default file |
+| --- | --- | --- |
+| Specification | `tasks/specs/` | `tasks/specs/<feature-slug>.md` |
+| Plan | `tasks/plan/` | `tasks/plan/plan.md` |
+| Task list | `tasks/todo/` | `tasks/todo/todo.md` |
+
+Apply the same rule to every other kind: a file of kind `<kind>` is saved at
+`tasks/<kind>/<file>.md`. `todo.md` goes in `tasks/todo/`. `plan.md` goes in
+`tasks/plan/`. A named list such as `todo-internal-conversations.md` goes in
+`tasks/todo/`. A capability map goes in `tasks/maps/`.
+
+Create the kind folder when it does not exist. When several plans or task
+lists must coexist, keep each file inside its kind folder and name it after
+the feature slug (`tasks/plan/<feature-slug>.md`,
+`tasks/todo/<feature-slug>.md`).
+
 ## When to Use
 
 - Starting a new project or feature
@@ -66,7 +87,7 @@ Build order: identity → billing, notifications → reporting
 
 **The map is gated like every phase.** The human reviews module boundaries, dependency direction, and build order before any module spec is written. Getting the map wrong is expensive; reviewing ten lines is not.
 
-**Then recurse per module.** Run Specify → Plan → Tasks → Implement for each module in dependency order. Each module gets its own spec, scoped to that module's objective, boundaries, and success criteria. Save the approved map at the project root and each module's spec alongside it, named by module id (`SPEC-identity.md`, `SPEC-billing.md`) — the map, not filename guessing, is the index of what exists.
+**Then recurse per module.** Run Specify → Plan → Tasks → Implement for each module in dependency order. Each module gets its own spec, scoped to that module's objective, boundaries, and success criteria. Save the approved map in `tasks/maps/` and each module spec in `tasks/specs/`, named by module id (`tasks/maps/<initiative>-capability-map.md`, `tasks/specs/<module-id>.md`) — the map, not filename guessing, is the index of what exists. See Artifact layout.
 
 ### Phase 1: Specify
 
@@ -189,7 +210,7 @@ With the validated spec, generate a technical implementation plan:
 
 > Follow `planning-and-task-breakdown` for the dependency-graph mapping and vertical-slicing mechanics behind these steps; it is the canonical source. The bullets above are a lightweight summary; if they ever diverge, `planning-and-task-breakdown` takes precedence.
 >
-> **Output convention:** Save the plan to `tasks/plan.md` and record the task list in the task list target defined by `planning-and-task-breakdown` (default `tasks/todo.md`; projects may designate an external tracker instead). Create `tasks/` if it does not exist. Downstream commands (`/build`, etc.) expect these defaults.
+> **Output convention:** Save the plan to `tasks/plan/plan.md` and record the task list in the task list target defined by `planning-and-task-breakdown` (default `tasks/todo/todo.md`; projects may designate an external tracker instead). Create `tasks/plan/` and `tasks/todo/` if they do not exist. Follow Artifact layout for every other file under `tasks/`. Downstream commands (`/build`, etc.) expect these defaults.
 
 The plan should be reviewable: the human should be able to read it and say "yes, that's the right approach" or "no, change X."
 
@@ -261,6 +282,7 @@ Before proceeding to implementation, confirm:
 - [ ] The turn ended after saving the spec; approval came in a later turn
 - [ ] Success criteria are specific and testable
 - [ ] Boundaries (Always/Ask First/Never) are defined
-- [ ] The spec is saved to a file in the repository
+- [ ] The spec is saved under `tasks/specs/`
+- [ ] The plan is saved under `tasks/plan/` and the task list under `tasks/todo/`
 - [ ] If the request bundles several independently testable capabilities, a capability map (module ids, dependency direction, build order) was approved before any module spec was written
 - [ ] Every module spec traces to a module id in the approved map

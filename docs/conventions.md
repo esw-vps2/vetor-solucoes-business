@@ -11,10 +11,17 @@ API, and data-model decisions belong in their matching contracts under
 .agents/
 └── skills/
 tasks/
-└── specs/
-    ├── _template.md
-    └── <feature-slug>.md
+├── specs/
+│   ├── _template.md
+│   └── <feature-slug>.md
+├── plan/
+│   └── plan.md
+└── todo/
+    └── todo.md
 ```
+
+Save each artifact under `tasks/` in the folder for its kind. Do not leave
+`plan.md`, `todo.md`, or another task artifact directly in `tasks/`.
 
 - Copy `tasks/specs/_template.md` to create a feature specification.
 - Use lowercase kebab-case file names, prefixed with the specification id,

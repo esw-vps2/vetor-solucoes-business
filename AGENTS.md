@@ -113,8 +113,8 @@ For specification-driven work, use:
 - [`planning-and-task-breakdown`](.agents/skills/profiles/architecture/planning-and-task-breakdown/SKILL.md)
 - [`sdd-implement`](.agents/skills/task/sdd-implement/SKILL.md)
 
-Persist specifications in `tasks/specs/`, plans in `tasks/plan.md`, and task
-lists in `tasks/todo.md`.
+Persist specifications in `tasks/specs/`, plans in `tasks/plan/`, and task
+lists in `tasks/todo/`. Do not save those files directly in `tasks/`.
 
 ### Frontend
 

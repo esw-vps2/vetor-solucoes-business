@@ -8,7 +8,7 @@ The agent acts as a senior engineer: it asks about unresolved business and secur
 human request -> agent specification -> human approval -> implementation -> human validation
 ```
 
-Feature specifications live in `tasks/specs/` and follow the template at `tasks/specs/_template.md`. Product behavior may start only after a human sets `status: approved`.
+Feature specifications live in `tasks/specs/` and follow the template at `tasks/specs/_template.md`. Plans live in `tasks/plan/` and task lists live in `tasks/todo/`. Product behavior may start only after a human sets `status: approved`.
 
 ## Responsibilities
 
