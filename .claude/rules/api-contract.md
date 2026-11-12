@@ -1,0 +1,1 @@
+../../.cursor/rules/api-contract.mdc

@@ -1,7 +1,10 @@
 ---
 description: Backend testing patterns with Vitest
-globs: backend/**/*.ts
+globs: backend/**/*.ts,worker-proxy-agent-ia/**/*.ts
 alwaysApply: false
+paths:
+  - "backend/**/*.ts"
+  - "worker-proxy-agent-ia/**/*.ts"
 ---
 
 # Backend testing

@@ -2,6 +2,8 @@
 description: Security patterns for Next.js applications in the frontend
 globs: frontend/**/*
 alwaysApply: false
+paths:
+  - "frontend/**/*"
 ---
 # Security patterns — Next.js
 

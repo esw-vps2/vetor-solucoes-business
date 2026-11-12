@@ -1,0 +1,1 @@
+../../.cursor/rules/nextjs_testing.mdc

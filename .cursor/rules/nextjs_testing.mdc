@@ -2,6 +2,8 @@
 description: Frontend testing patterns with Vitest
 globs: frontend/**/*
 alwaysApply: false
+paths:
+  - "frontend/**/*"
 ---
 
 # Frontend testing

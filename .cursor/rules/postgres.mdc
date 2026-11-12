@@ -2,6 +2,9 @@
 description: PostgreSQL conventions when persistence is adopted
 globs: backend/**/*,infrastructure/**/*
 alwaysApply: false
+paths:
+  - "backend/**/*"
+  - "infrastructure/**/*"
 ---
 
 # PostgreSQL

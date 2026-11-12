@@ -86,6 +86,7 @@ The root owns shared configuration:
 - `.github/workflows/` for repository automation
 - `.cursor/rules/` for persistent agent guidance
 - `.agents/skills/` for the shared skill registry
+- `CLAUDE.md` and `.claude/` as the Claude Code bridge to those two trees
 
 ## Environment variables
 

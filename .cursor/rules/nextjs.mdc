@@ -2,6 +2,8 @@
 description: Next.js patterns for the frontend
 globs: frontend/**/*
 alwaysApply: false
+paths:
+  - "frontend/**/*"
 ---
 
 # Next.js

@@ -1,7 +1,11 @@
 ---
 description: HTTP contract source and change requirements
-globs: backend/**/*,frontend/lib/api/**/*
+globs: backend/**/*,frontend/lib/api/**/*,worker-proxy-agent-ia/**/*
 alwaysApply: false
+paths:
+  - "backend/**/*"
+  - "frontend/lib/api/**/*"
+  - "worker-proxy-agent-ia/**/*"
 ---
 
 # HTTP contract

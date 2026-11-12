@@ -1,7 +1,14 @@
 ---
 description: Shared TypeScript naming, type, and formatting conventions
-globs: backend/**/*.ts,backend/**/*.tsx,frontend/**/*.ts,frontend/**/*.tsx
+globs: backend/**/*.ts,backend/**/*.tsx,frontend/**/*.ts,frontend/**/*.tsx,worker-proxy-agent-ia/**/*.ts,worker-proxy-agent-ia/**/*.tsx
 alwaysApply: false
+paths:
+  - "backend/**/*.ts"
+  - "backend/**/*.tsx"
+  - "frontend/**/*.ts"
+  - "frontend/**/*.tsx"
+  - "worker-proxy-agent-ia/**/*.ts"
+  - "worker-proxy-agent-ia/**/*.tsx"
 ---
 
 # TypeScript style

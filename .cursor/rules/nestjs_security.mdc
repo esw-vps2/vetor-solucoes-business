@@ -1,7 +1,10 @@
 ---
 description: Security patterns for NestJS applications
-globs: backend/**/*.ts
+globs: backend/**/*.ts,worker-proxy-agent-ia/**/*.ts
 alwaysApply: false
+paths:
+  - "backend/**/*.ts"
+  - "worker-proxy-agent-ia/**/*.ts"
 ---
 
 # Security patterns — NestJS

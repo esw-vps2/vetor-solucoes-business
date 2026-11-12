@@ -1,7 +1,10 @@
 ---
 description: NestJS patterns for the backend
-globs: backend/**/*
+globs: backend/**/*,worker-proxy-agent-ia/**/*
 alwaysApply: false
+paths:
+  - "backend/**/*"
+  - "worker-proxy-agent-ia/**/*"
 ---
 
 # NestJS

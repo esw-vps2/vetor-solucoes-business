@@ -2,6 +2,8 @@
 description: TypeORM patterns and migrations when persistence is adopted
 globs: backend/**/*
 alwaysApply: false
+paths:
+  - "backend/**/*"
 ---
 
 # TypeORM

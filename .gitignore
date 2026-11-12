@@ -47,3 +47,7 @@ infraestrutura/.env
 
 # Figma / scratch exports (local reference only)
 tmp/
+
+# Claude Code local overrides
+CLAUDE.local.md
+.claude/settings.local.json

@@ -34,6 +34,9 @@ Every skill has its own directory and a valid `SKILL.md` file:
 The optional directories are present only when a skill needs them. The
 directory name is the local skill identifier.
 
+Claude Code loads the same skills through symlinks at `.claude/skills/<skill-id>`.
+Keep the files in this tree.
+
 ## Registry files
 
 Read these files before selecting or installing a skill:

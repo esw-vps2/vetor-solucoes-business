@@ -12,8 +12,9 @@ the project contracts, rules, and skills that govern agent work.
 - `infrastructure/` — Docker Compose, Dockerfiles, and PostgreSQL
 - `docs/` — global contracts, conventions, and durable decisions
 - `tasks/` — feature specifications, plans, and task lists
-- `.cursor/rules/` — persistent repository guidance
+- `.cursor/rules/` — canonical persistent repository guidance
 - `.agents/skills/` — canonical repository skill registry, catalogs, and profiles
+- `CLAUDE.md` and `.claude/` — Claude Code bridge to this file, the rules, and the skills
 
 ## Before implementation
 
@@ -49,7 +50,15 @@ When sources conflict, use this order:
 
 Never weaken security controls to ship a faster solution.
 
+## Tool bridges
+
+Cursor reads this file and `.cursor/rules/` directly. Claude Code reads this file through the import in `CLAUDE.md`, and it reads rules and skills through the symlinks in `.claude/rules/` and `.claude/skills/`.
+
+Add or change guidance in this file, `.cursor/rules/`, or `.agents/skills/`. Personal Claude preferences belong in gitignored `CLAUDE.local.md` or `.claude/settings.local.json`.
+
 ## Cursor rules
+
+Path-scoped rules declare the same file patterns in `globs` for Cursor and `paths` for Claude Code. The `.claude/rules/*.md` entries are symlinks to these `.mdc` files.
 
 ### Always applied
 

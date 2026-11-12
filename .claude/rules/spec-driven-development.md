@@ -1,0 +1,1 @@
+../../.cursor/rules/spec-driven-development.mdc

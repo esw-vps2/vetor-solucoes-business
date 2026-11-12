@@ -1,0 +1,1 @@
+../../.cursor/rules/nestjs_security.mdc
